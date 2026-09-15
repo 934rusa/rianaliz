@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>R❤️İ Football</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #080b12;
+      color: white;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 20px;
+      background: #101522;
+      border-bottom: 1px solid #242b3a;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      font-size: 24px;
+    }
+
+    header p {
+      color: #8f9aad;
+      margin-top: 5px;
+      font-size: 13px;
+    }
+
+    main {
+      padding: 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .card {
+      background: #111722;
+      border: 1px solid #242c3c;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 15px;
+    }
+
+    .card h2 {
+      margin-bottom: 10px;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 14px;
+      background: #1b2433;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #263247;
+    }
+
+    .green {
+      color: #39e58c;
+    }
+
+    .yellow {
+      color: #ffd84d;
+    }
+
+    .red {
+      color: #ff5b6e;
+    }
+
+    #status {
+      margin-top: 15px;
+      color: #9ba7b9;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 12px;
+      }
+
+      .menu {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>⚽ R❤️İ Football</h1>
+    <p>Gerçek verilerle futbol analiz sistemi</p>
+  </header>
+
+  <main>
+
+    <div class="card">
+      <h2>🏠 Ana Sayfa</h2>
+      <p>Futbol maçlarını analiz etmek için aşağıdaki bölümlerden birini seç.</p>
+    </div>
+
+    <div class="card">
+      <h2>📊 Analiz Merkezi</h2>
+
+      <div class="menu">
+        <button onclick="showMessage('🏆 Tüm Ligler')">
+          🏆 Tüm Ligler
+        </button>
+
+        <button onclick="showMessage('🔎 Maç Ara')">
+          🔎 Maç Ara
+        </button>
+
+        <button onclick="showMessage('🎯 Maç Analizi')">
+          🎯 Maç Analizi
+        </button>
+
+        <button onclick="showMessage('🟢 Banko Kupon')">
+          🟢 Banko Kupon
+        </button>
+
+        <button onclick="showMessage('🟡 Orta Riskli Kupon')">
+          🟡 Orta Riskli Kupon
+        </button>
+
+        <button onclick="showMessage('🔴 Riskli Kupon')">
+          🔴 Riskli Kupon
+        </button>
+
+        <button onclick="showMessage('🚀 Yüksek Oranlı Kupon')">
+          🚀 Yüksek Oranlı Kupon
+        </button>
+
+        <button onclick="showMessage('⚽ 1/2 & KG Maçları')">
+          ⚽ 1/2 & KG Maçları
+        </button>
+
+        <button onclick="showMessage('📊 İstatistikler')">
+          📊 İstatistikler
+        </button>
+
+        <button onclick="showMessage('⭐ Favoriler')">
+          ⭐ Favoriler
+        </button>
+      </div>
+
+      <div id="status">
+        Sistem hazır.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🏆 En Güçlü Seçim</h2>
+      <p class="green">Henüz maç verisi yüklenmedi.</p>
+    </div>
+
+    <div class="card">
+      <h2>🟢 Banko Seçimler</h2>
+      <p>API bağlantısı yapıldığında gerçek maçlar burada görünecek.</p>
+    </div>
+
+    <div class="card">
+      <h2>📈 Canlı Veriler</h2>
+      <p>Skor, şut, isabetli şut, korner, kart, topa sahip olma ve desteklenen diğer canlı istatistikler burada gösterilecek.</p>
+    </div>
+
+  </main>
+
+  <script>
+    function showMessage(section) {
+      document.getElementById("status").textContent =
+        section + " bölümü hazırlanıyor...";
+    }
+  </script>
+
+</body>
+</html>
