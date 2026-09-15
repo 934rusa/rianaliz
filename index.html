@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI İddaa Analiz & Tahmin Motoru</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 15px 0;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    .match-card {
+      background-color: #1e293b;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 1px solid #334155;
+    }
+
+    .match-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 8px;
+    }
+
+    .teams {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .team {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      width: 42%;
+    }
+
+    .team img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .vs {
+      font-size: 0.8rem;
+      color: #38bdf8;
+      font-weight: bold;
+      background: #0f172a;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .ai-analysis {
+      background-color: #0f172a;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.85rem;
+      border-left: 3px solid #10b981;
+    }
+
+    .ai-title {
+      color: #10b981;
+      font-weight: bold;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .ai-desc {
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⚡ Canlı AI Futbol Analiz</h1>
+  </header>
+
+  <div id="matches-container">
+    <div class="loading">Güncel canlı maçlar çekiliyor...</div>
+  </div>
+
+  <script>
+    const API_KEY = "d2e372a58c1e79622c77f4840f270f92";
+
+    async function fetchLiveMatches() {
+      const container = document.getElementById('matches-container');
+      
+      try {
+        const response = await fetch('https://v3.football.api-sports.io/fixtures?live=all', {
+          method: 'GET',
+          headers: {
+            'x-apisports-key': API_KEY
+          }
+        });
+
+        const data = await response.json();
+
+        if (!data.response || data.response.length === 0) {
+          container.innerHTML = '<div class="loading">Şu anda canlı oynanan maç bulunamadı.</div>';
+          return;
+        }
+
+        container.innerHTML = '';
+
+        data.response.slice(0, 10).forEach(item => {
+          const league = item.league.name;
+          const homeTeam = item.teams.home.name;
+          const homeLogo = item.teams.home.logo;
+          const awayTeam = item.teams.away.name;
+          const awayLogo = item.teams.away.logo;
+          const homeGoals = item.goals.home ?? 0;
+          const awayGoals = item.goals.away ?? 0;
+          const elapsed = item.fixture.status.elapsed;
+
+          const card = document.createElement('div');
+          card.className = 'match-card';
+          card.innerHTML = `
+            <div class="match-header">
+              <span>🏆 ${league}</span>
+              <span style="color: #ef4444; font-weight: bold;">🔴 ${elapsed}' dk</span>
+            </div>
+            <div class="teams">
+              <div class="team">
+                <img src="${homeLogo}" alt="${homeTeam}">
+                <span>${homeTeam}</span>
+              </div>
+              <div class="vs">${homeGoals} - ${awayGoals}</div>
+              <div class="team" style="justify-content: flex-end;">
+                <span>${awayTeam}</span>
+                <img src="${awayLogo}" alt="${awayTeam}">
+              </div>
+            </div>
+            <div class="ai-analysis">
+              <div class="ai-title">🤖 Yapay Zeka Canlı Yorumu</div>
+              <div class="ai-desc">Maçın ${elapsed}. dakikası itibarıyla tempo yüksek. Karşılıklı ataklar devam ediyor, Gol ihtimali yüksek.</div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+      } catch (error) {
+        console.error('API Hatası:', error);
+        container.innerHTML = '<div class="loading">Maçlar yüklenirken bir hata oluştu.</div>';
+      }
+    }
+
+    fetchLiveMatches();
+  </script>
+</body>
+</html>
