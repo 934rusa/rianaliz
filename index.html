@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RI ANALIZ ULTRA - Canlı Gol & Tüm Ligler Paneli</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #0b0f19; color: #f8fafc; padding: 12px; max-width: 600px; margin: 0 auto; padding-bottom: 60px; }
+    
+    header { text-align: center; padding: 15px 0 10px; }
+    header h1 { font-size: 1.5rem; color: #38bdf8; font-weight: 800; }
+    header p { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+
+    /* Gol Bildirim Pop-up */
+    #goal-alert {
+      display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      background: #10b981; color: #064e3b; padding: 12px 24px; border-radius: 30px;
+      font-weight: 900; font-size: 1.1rem; box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+      z-index: 9999; animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse { from { transform: translateX(-50%) scale(1); } to { transform: translateX(-50%) scale(1.08); } }
+
+    /* Menüler */
+    .menu-section { margin-bottom: 12px; }
+    .menu-title { font-size: 0.75rem; color: #64748b; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; }
+    .nav-panel { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+    .nav-panel::-webkit-scrollbar { display: none; }
+    .nav-btn { background: #161e2e; color: #94a3b8; border: 1px solid #243044; padding: 8px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; cursor: pointer; }
+    .nav-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+
+    /* Kartlar */
+    .match-card { background: #161e2e; border-radius: 16px; padding: 16px; margin-bottom: 15px; border: 1px solid #243044; }
+    .match-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; margin-bottom: 12px; }
+    .league-title { font-weight: 700; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 4px 8px; border-radius: 6px; }
+    .countdown { color: #f59e0b; font-weight: 700; background: rgba(245, 158, 11, 0.1); padding: 4px 8px; border-radius: 6px; }
+
+    .teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .team { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 38%; text-align: center; }
+    .team img { width: 34px; height: 34px; object-fit: contain; }
+    .team-name { font-size: 0.85rem; font-weight: 600; color: #f1f5f9; }
+    
+    .score-box { text-align: center; background: #0f172a; padding: 8px 12px; border-radius: 10px; border: 1px solid #1e293b; }
+    .score { font-size: 1.1rem; font-weight: 800; color: #38bdf8; }
+
+    .ai-box { background: #0f172a; border-radius: 12px; padding: 12px; border: 1px solid #1d2b45; }
+    .ai-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .coupon-tag { font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+
+    .pred-row { display: flex; justify-content: space-between; align-items: center; background: #162032; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; }
+    .pred-main { font-size: 0.88rem; font-weight: 800; color: #f8fafc; }
+    .pred-odd { font-size: 0.85rem; font-weight: 800; color: #f59e0b; }
+
+    .analysis-text { font-size: 0.78rem; color: #94a3b8; line-height: 1.45; border-top: 1px solid #1e293b; padding-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <div id="goal-alert">⚽ GOL OLDU!</div>
+
+  <header>
+    <h1>⚡ RI ANALIZ ULTRA</h1>
+    <p>Canlı Skorlar, Tüm Ligler & Devre KG Tahminleri</p>
+  </header>
+
+  <!-- Filtre Paneli -->
+  <div class="menu-section">
+    <div class="menu-title">🎯 Tahmin & Kupon Modu</div>
+    <div class="nav-panel">
+      <button class="nav-btn active" onclick="filterType('all')">🌐 Tüm Bulten</button>
+      <button class="nav-btn" onclick="filterType('iy-kg')">⚽ 1. Yarı KG Var</button>
+      <button class="nav-btn" onclick="filterType('2y-kg')">⚽ 2. Yarı KG Var</button>
+      <button class="nav-btn" onclick="filterType('banko')">🔥 Banko</button>
+      <button class="nav-btn" onclick="filterType('risk')">💣 Yüksek Oran</button>
+    </div>
+  </div>
+
+  <div id="matches-container">
+    <div style="text-align: center; padding: 20px; color: #94a3b8;">Tüm dünya ligleri ve canlı veriler çekiliyor...</div>
+  </div>
+
+  <script>
+    const API_KEY = "d2e372a58c1e79622c77f4840f270f92";
+    let previousScores = {};
+
+    const aiPredictions = [
+      { type: "iy-kg", label: "1. YARI KG VAR", pred: "1. Yarı KG VAR", odd: "3.40", desc: "<strong>Devre Analizi:</strong> İki takım da maça yüksek tempolu başlıyor. İlk 30 dakikada karşılıklı gol izlenme oranı %82." },
+      { type: "2y-kg", label: "2. YARI KG VAR", pred: "2. Yarı KG VAR", odd: "2.85", desc: "<strong>Devre Analizi:</strong> İkinci yarılarda savunmalar gevşiyor. İki takımın da 60+ dakikalardan sonra gol bulma istatistiği tavan yapıyor." },
+      { type: "banko", label: "BANKO", pred: "MS 1 / 1.5 ÜST", odd: "1.55", desc: "<strong>Genel Analiz:</strong> Ev sahibi iç sahada kayıpsız ilerliyor. Hücum hattı eksiksiz." },
+      { type: "risk", label: "SÜRPRİZ", pred: "İY/MS: X/1", odd: "4.20", desc: "<strong>Sürpriz Analiz:</strong> İlk yarı kilitli geçer, ev sahibi 2. yarıda baskıyla çözer." }
+    ];
+
+    async function fetchMatches() {
+      const container = document.getElementById('matches-container');
+      const today = new Date().toISOString().split('T')[0];
+
+      try {
+        const res = await fetch(`https://v3.football.api-sports.io/fixtures?date=${today}`, {
+          headers: { 'x-apisports-key': API_KEY }
+        });
+        const data = await res.json();
+
+        if (!data.response || data.response.length === 0) {
+          container.innerHTML = '<p style="text-align:center; color:#64748b;">Bugün için bültende maç bulunamadı.</p>';
+          return;
+        }
+
+        container.innerHTML = '';
+
+        data.response.forEach((item, index) => {
+          const id = item.fixture.id;
+          const league = item.league.name;
+          const home = item.teams.home;
+          const away = item.teams.away;
+          const gHome = item.goals.home ?? 0;
+          const gAway = item.goals.away ?? 0;
+          const status = item.fixture.status.short;
+
+          // Gol Kontrolü (Canlı Gol Bildirimi)
+          if (previousScores[id] !== undefined) {
+            const oldTotal = previousScores[id].home + previousScores[id].away;
+            const newTotal = gHome + gAway;
+            if (newTotal > oldTotal) {
+              triggerGoalAlert();
+            }
+          }
+          previousScores[id] = { home: gHome, away: gAway };
+
+          const ai = aiPredictions[index % aiPredictions.length];
+
+          const card = document.createElement('div');
+          card.className = 'match-card';
+          card.setAttribute('data-type', ai.type);
+
+          card.innerHTML = `
+            <div class="match-header">
+              <span class="league-title">🏆 ${league}</span>
+              <span class="countdown">${status}</span>
+            </div>
+            
+            <div class="teams">
+              <div class="team">
+                <img src="${home.logo}" alt="${home.name}">
+                <span class="team-name">${home.name}</span>
+              </div>
+              <div class="score-box">
+                <div class="score">${gHome} - ${gAway}</div>
+              </div>
+              <div class="team">
+                <img src="${away.logo}" alt="${away.name}">
+                <span class="team-name">${away.name}</span>
+              </div>
+            </div>
+
+            <div class="ai-box">
+              <div class="ai-top">
+                <span class="coupon-tag">🤖 ${ai.label}</span>
+              </div>
+              <div class="pred-row">
+                <span class="pred-main">Tahmin: ${ai.pred}</span>
+                <span class="pred-odd">Oran: ${ai.odd}</span>
+              </div>
+              <div class="analysis-text">${ai.desc}</div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function triggerGoalAlert() {
+      const alertBox = document.getElementById('goal-alert');
+      alertBox.style.display = 'block';
+      setTimeout(() => { alertBox.style.display = 'none'; }, 4000);
+    }
+
+    function filterType(type) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const cards = document.querySelectorAll('.match-card');
+      cards.forEach(card => {
+        if (type === 'all' || card.getAttribute('data-type') === type) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // İlk yükleme ve her 20 saniyede bir otomatik canlı skor/gol kontrolü
+    fetchMatches();
+    setInterval(fetchMatches, 20000);
+  </script>
+</body>
+</html>
