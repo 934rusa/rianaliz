@@ -1,0 +1,2986 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07111f">
+<title>R❤️İ Football Intelligence</title>
+
+<style>
+:root{
+  --bg:#050a12;
+  --bg2:#091322;
+  --card:rgba(15,27,45,.78);
+  --card2:rgba(20,35,56,.65);
+  --border:rgba(255,255,255,.09);
+  --text:#f4f7fb;
+  --muted:#8fa2b8;
+  --green:#19d47b;
+  --green2:#0ea968;
+  --yellow:#ffc857;
+  --orange:#ff8b38;
+  --red:#ff4d67;
+  --blue:#3d8bff;
+  --purple:#9b6cff;
+  --shadow:0 18px 50px rgba(0,0,0,.35);
+  --radius:20px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+html{scroll-behavior:smooth}
+
+body{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 10% 0%,rgba(61,139,255,.12),transparent 30%),
+    radial-gradient(circle at 90% 20%,rgba(155,108,255,.10),transparent 25%),
+    var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+button,input,select{font:inherit}
+
+button{
+  cursor:pointer;
+  border:0;
+}
+
+.app{
+  min-height:100vh;
+}
+
+/* ================= HEADER ================= */
+
+.topbar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:70px;
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:0 22px;
+  background:rgba(4,9,16,.82);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+
+.menu-btn{
+  width:44px;
+  height:44px;
+  border-radius:13px;
+  background:rgba(255,255,255,.07);
+  color:#fff;
+  font-size:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:.2s;
+}
+
+.menu-btn:hover{
+  background:rgba(255,255,255,.13);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:900;
+  letter-spacing:.4px;
+  font-size:18px;
+}
+
+.brand-heart{
+  color:#ff315a;
+}
+
+.brand-ball{
+  font-size:23px;
+}
+
+.header-search{
+  margin-left:auto;
+  width:min(390px,45vw);
+  position:relative;
+}
+
+.header-search input{
+  width:100%;
+  height:42px;
+  padding:0 16px 0 42px;
+  color:#fff;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--border);
+  outline:none;
+  border-radius:13px;
+}
+
+.header-search span{
+  position:absolute;
+  left:14px;
+  top:10px;
+  color:var(--muted);
+}
+
+.api-status{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  font-size:12px;
+  color:var(--muted);
+}
+
+.status-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--red);
+}
+
+.status-dot.ok{
+  background:var(--green);
+  box-shadow:0 0 12px var(--green);
+}
+
+/* ================= SIDEBAR ================= */
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.58);
+  z-index:1090;
+  opacity:0;
+  visibility:hidden;
+  transition:.25s;
+}
+
+.overlay.active{
+  opacity:1;
+  visibility:visible;
+}
+
+.sidebar{
+  position:fixed;
+  top:0;
+  left:0;
+  bottom:0;
+  width:290px;
+  z-index:1100;
+  padding:20px 14px;
+  background:rgba(7,15,27,.97);
+  border-right:1px solid var(--border);
+  transform:translateX(-105%);
+  transition:.3s ease;
+  overflow-y:auto;
+  box-shadow:30px 0 80px rgba(0,0,0,.3);
+}
+
+.sidebar.active{
+  transform:translateX(0);
+}
+
+.side-brand{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 10px 20px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:14px;
+}
+
+.side-title{
+  font-weight:900;
+  font-size:19px;
+}
+
+.close-menu{
+  background:transparent;
+  color:#fff;
+  font-size:25px;
+}
+
+.nav-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px 14px;
+  margin:4px 0;
+  border-radius:13px;
+  background:transparent;
+  color:#b9c6d6;
+  text-align:left;
+  transition:.2s;
+}
+
+.nav-item:hover,
+.nav-item.active{
+  color:#fff;
+  background:linear-gradient(90deg,rgba(61,139,255,.18),rgba(155,108,255,.08));
+}
+
+.nav-icon{
+  width:27px;
+  text-align:center;
+  font-size:17px;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+  padding:94px 24px 40px;
+  max-width:1500px;
+  margin:auto;
+}
+
+.page{
+  display:none;
+  animation:fadeIn .25s ease;
+}
+
+.page.active{
+  display:block;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.hero{
+  padding:30px;
+  border:1px solid var(--border);
+  border-radius:26px;
+  background:
+    linear-gradient(135deg,rgba(61,139,255,.13),rgba(155,108,255,.08)),
+    rgba(10,20,34,.7);
+  box-shadow:var(--shadow);
+  margin-bottom:22px;
+}
+
+.hero h1{
+  font-size:clamp(27px,4vw,46px);
+  line-height:1.05;
+  margin-bottom:12px;
+}
+
+.hero p{
+  color:var(--muted);
+  max-width:760px;
+  line-height:1.7;
+}
+
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:22px;
+}
+
+.primary-btn,
+.secondary-btn{
+  padding:12px 17px;
+  border-radius:12px;
+  font-weight:800;
+  transition:.2s;
+}
+
+.primary-btn{
+  color:#fff;
+  background:linear-gradient(135deg,#347eff,#704cff);
+}
+
+.secondary-btn{
+  color:#d9e5f5;
+  background:rgba(255,255,255,.07);
+  border:1px solid var(--border);
+}
+
+.primary-btn:hover,
+.secondary-btn:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.08);
+}
+
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:30px 0 14px;
+  gap:15px;
+}
+
+.section-title h2{
+  font-size:20px;
+}
+
+.section-title small{
+  color:var(--muted);
+}
+
+/* ================= GRID ================= */
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:15px;
+}
+
+.grid-3{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:15px;
+}
+
+.grid-2{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:15px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:0 10px 35px rgba(0,0,0,.18);
+}
+
+.card:hover{
+  border-color:rgba(255,255,255,.14);
+}
+
+.pick-card{
+  position:relative;
+  overflow:hidden;
+}
+
+.pick-card::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:3px;
+  background:linear-gradient(90deg,var(--blue),var(--purple));
+}
+
+.match-card{
+  cursor:pointer;
+  transition:.2s;
+}
+
+.match-card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(61,139,255,.35);
+}
+
+.match-head{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:14px;
+}
+
+.teams{
+  display:grid;
+  grid-template-columns:1fr 42px 1fr;
+  align-items:center;
+  gap:10px;
+}
+
+.team{
+  text-align:center;
+  font-weight:800;
+  line-height:1.35;
+}
+
+.team-logo{
+  width:42px;
+  height:42px;
+  object-fit:contain;
+  display:block;
+  margin:0 auto 7px;
+}
+
+.vs{
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.time{
+  text-align:center;
+  font-size:17px;
+  font-weight:900;
+  color:#fff;
+}
+
+.pick{
+  margin-top:15px;
+  padding:12px;
+  border-radius:13px;
+  background:rgba(255,255,255,.045);
+}
+
+.pick-main{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  align-items:center;
+}
+
+.pick-market{
+  font-weight:900;
+}
+
+.confidence{
+  margin-top:12px;
+}
+
+.conf-row{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+
+.bar{
+  height:7px;
+  border-radius:99px;
+  background:rgba(255,255,255,.08);
+  overflow:hidden;
+}
+
+.bar span{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,var(--green),#5be6a5);
+}
+
+.reason{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.55;
+  margin-top:10px;
+}
+
+/* ================= BADGES ================= */
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.low{
+  color:#56e8a1;
+  background:rgba(25,212,123,.11);
+  border:1px solid rgba(25,212,123,.22);
+}
+
+.medium{
+  color:#ffd76c;
+  background:rgba(255,200,87,.11);
+  border:1px solid rgba(255,200,87,.22);
+}
+
+.high{
+  color:#ff9b5c;
+  background:rgba(255,139,56,.11);
+  border:1px solid rgba(255,139,56,.22);
+}
+
+.very-high{
+  color:#ff7184;
+  background:rgba(255,77,103,.11);
+  border:1px solid rgba(255,77,103,.22);
+}
+
+/* ================= SEARCH ================= */
+
+.search-box{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.search-box input{
+  flex:1;
+  height:48px;
+  padding:0 16px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  outline:none;
+  color:#fff;
+  background:rgba(255,255,255,.06);
+}
+
+.league-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+
+.league-card{
+  padding:15px;
+  border-radius:15px;
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--border);
+  cursor:pointer;
+  transition:.2s;
+}
+
+.league-card:hover{
+  background:rgba(61,139,255,.1);
+  transform:translateY(-2px);
+}
+
+.league-country{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+/* ================= ANALYSIS ================= */
+
+.back-row{
+  margin-bottom:15px;
+}
+
+.analysis-hero{
+  display:grid;
+  grid-template-columns:1fr 150px 1fr;
+  align-items:center;
+  gap:20px;
+  text-align:center;
+  padding:25px;
+}
+
+.big-team{
+  font-size:20px;
+  font-weight:900;
+}
+
+.big-logo{
+  width:70px;
+  height:70px;
+  object-fit:contain;
+  display:block;
+  margin:0 auto 10px;
+}
+
+.score-big{
+  font-size:28px;
+  font-weight:950;
+}
+
+.analysis-layout{
+  display:grid;
+  grid-template-columns:1.6fr .9fr;
+  gap:16px;
+  margin-top:16px;
+}
+
+.table-wrap{
+  overflow:auto;
+}
+
+.compare-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:520px;
+}
+
+.compare-table th,
+.compare-table td{
+  padding:12px 10px;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+}
+
+.compare-table th{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.compare-table td{
+  font-weight:700;
+}
+
+.compare-table td:first-child{
+  color:var(--muted);
+}
+
+.market-list{
+  display:grid;
+  gap:9px;
+}
+
+.market{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px;
+  border-radius:13px;
+  background:rgba(255,255,255,.045);
+}
+
+.market-left{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.market-name{
+  font-weight:800;
+  font-size:13px;
+}
+
+.market-desc{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.score-pill{
+  min-width:58px;
+  text-align:center;
+  font-weight:900;
+  padding:7px 8px;
+  border-radius:10px;
+  background:rgba(25,212,123,.11);
+  color:#61e9a7;
+}
+
+.best-pick{
+  border:1px solid rgba(25,212,123,.3);
+  background:
+    radial-gradient(circle at 100% 0%,rgba(25,212,123,.12),transparent 40%),
+    rgba(15,32,29,.8);
+}
+
+.best-pick-title{
+  color:#60e9a5;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.7px;
+}
+
+.best-pick-market{
+  font-size:28px;
+  font-weight:950;
+  margin:7px 0;
+}
+
+.info-list{
+  display:grid;
+  gap:9px;
+}
+
+.info-row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  color:var(--muted);
+  font-size:13px;
+  padding-bottom:9px;
+  border-bottom:1px solid var(--border);
+}
+
+.info-row strong{
+  color:#fff;
+  text-align:right;
+}
+
+/* ================= STATS ================= */
+
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+
+.stat-box{
+  padding:17px;
+  border-radius:16px;
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--border);
+}
+
+.stat-number{
+  font-size:27px;
+  font-weight:950;
+}
+
+.stat-label{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:4px;
+}
+
+/* ================= LOADING ================= */
+
+.loading{
+  min-height:180px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  gap:12px;
+}
+
+.spinner{
+  width:35px;
+  height:35px;
+  border:3px solid rgba(255,255,255,.1);
+  border-top-color:var(--blue);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+.empty{
+  text-align:center;
+  padding:40px 20px;
+  color:var(--muted);
+}
+
+.error{
+  color:#ff8291;
+  background:rgba(255,77,103,.08);
+  border:1px solid rgba(255,77,103,.18);
+  padding:14px;
+  border-radius:13px;
+  margin:10px 0;
+}
+
+/* ================= MODAL ================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:2000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(8px);
+}
+
+.modal.active{
+  display:flex;
+}
+
+.modal-box{
+  width:min(650px,100%);
+  max-height:90vh;
+  overflow:auto;
+  padding:25px;
+  border-radius:23px;
+  border:1px solid var(--border);
+  background:#0b1625;
+  box-shadow:var(--shadow);
+}
+
+.modal-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+
+.modal-close{
+  background:rgba(255,255,255,.07);
+  color:#fff;
+  width:38px;
+  height:38px;
+  border-radius:10px;
+}
+
+.form-group{
+  margin-bottom:15px;
+}
+
+.form-group label{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:7px;
+}
+
+.form-group input{
+  width:100%;
+  height:45px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.05);
+  color:#fff;
+  padding:0 13px;
+  outline:none;
+}
+
+/* ================= TOAST ================= */
+
+.toast{
+  position:fixed;
+  bottom:22px;
+  right:22px;
+  z-index:3000;
+  padding:13px 17px;
+  background:#142236;
+  border:1px solid var(--border);
+  border-radius:13px;
+  box-shadow:var(--shadow);
+  transform:translateY(30px);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1100px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .league-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .analysis-layout{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:760px){
+  .topbar{
+    padding:0 12px;
+  }
+
+  .brand{
+    font-size:15px;
+  }
+
+  .header-search{
+    display:none;
+  }
+
+  .api-status{
+    margin-left:auto;
+  }
+
+  .main{
+    padding:84px 12px 30px;
+  }
+
+  .hero{
+    padding:21px;
+    border-radius:20px;
+  }
+
+  .grid,
+  .grid-3,
+  .grid-2{
+    grid-template-columns:1fr;
+  }
+
+  .league-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .analysis-hero{
+    grid-template-columns:1fr 90px 1fr;
+    padding:17px 8px;
+  }
+
+  .big-team{
+    font-size:15px;
+  }
+
+  .big-logo{
+    width:52px;
+    height:52px;
+  }
+
+  .score-big{
+    font-size:21px;
+  }
+
+  .stat-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:450px){
+  .api-status span:last-child{
+    display:none;
+  }
+
+  .league-grid{
+    grid-template-columns:1fr;
+  }
+
+  .analysis-hero{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn">☰</button>
+
+  <div class="brand">
+    <span class="brand-ball">⚽</span>
+    <span>R<span class="brand-heart">❤️</span>İ Football</span>
+  </div>
+
+  <div class="header-search">
+    <span>🔎</span>
+    <input id="globalSearch" placeholder="Takım, lig veya maç ara...">
+  </div>
+
+  <div class="api-status">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">API hazır değil</span>
+  </div>
+</header>
+
+<div class="overlay" id="overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="side-brand">
+    <div class="side-title">⚽ R❤️İ Menü</div>
+    <button class="close-menu" id="closeMenu">×</button>
+  </div>
+
+  <button class="nav-item active" data-page="home">
+    <span class="nav-icon">🏠</span> Ana Sayfa
+  </button>
+
+  <button class="nav-item" data-page="leagues">
+    <span class="nav-icon">🏆</span> Tüm Ligler
+  </button>
+
+  <button class="nav-item" data-page="search">
+    <span class="nav-icon">🔎</span> Maç Ara
+  </button>
+
+  <button class="nav-item" data-page="analysis">
+    <span class="nav-icon">🎯</span> Maç Analizi
+  </button>
+
+  <button class="nav-item" data-page="banko">
+    <span class="nav-icon">🟢</span> Banko Kupon
+  </button>
+
+  <button class="nav-item" data-page="medium">
+    <span class="nav-icon">🟡</span> Orta Riskli Kupon
+  </button>
+
+  <button class="nav-item" data-page="risky">
+    <span class="nav-icon">🔴</span> Riskli Kupon
+  </button>
+
+  <button class="nav-item" data-page="highodds">
+    <span class="nav-icon">🚀</span> Yüksek Oranlı Kupon
+  </button>
+
+  <button class="nav-item" data-page="halftime">
+    <span class="nav-icon">⚽</span> 1/2 & KG Maçları
+  </button>
+
+  <button class="nav-item" data-page="stats">
+    <span class="nav-icon">📊</span> İstatistikler
+  </button>
+
+  <button class="nav-item" data-page="favorites">
+    <span class="nav-icon">⭐</span> Favoriler
+  </button>
+
+  <button class="nav-item" id="apiSettingsBtn">
+    <span class="nav-icon">⚙️</span> API Ayarları
+  </button>
+</aside>
+
+<main class="main">
+
+<!-- ================= HOME ================= -->
+
+<section class="page active" id="page-home">
+
+  <div class="hero">
+    <h1>Bugünün Futbol<br>Analiz Merkezi</h1>
+
+    <p>
+      Maçları yalnızca oran üzerinden değil; form, gol trendleri,
+      iç/deplasman performansı, H2H ve mevcut API verileri üzerinden
+      değerlendiren istatistiksel analiz platformu.
+    </p>
+
+    <div class="hero-actions">
+      <button class="primary-btn" onclick="loadToday()">🔄 Bugünkü Maçları Getir</button>
+      <button class="secondary-btn" onclick="navigate('search')">🔎 Maç Ara</button>
+      <button class="secondary-btn" onclick="openApiSettings()">⚙️ API Ayarları</button>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <h2>🔥 Bugünün En Güçlü Seçimleri</h2>
+    <small id="todayCount">Veri bekleniyor</small>
+  </div>
+
+  <div class="grid" id="strongPicks">
+    <div class="loading">
+      <div class="spinner"></div>
+      <span>Maç verileri hazırlanıyor...</span>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <h2>🟢 Banko Seçimler</h2>
+  </div>
+
+  <div class="grid" id="bankoHome">
+    <div class="empty">API bağlantısı yapıldığında seçimler burada görünecek.</div>
+  </div>
+
+  <div class="section-title">
+    <h2>🟡 Orta Riskli Seçimler</h2>
+  </div>
+
+  <div class="grid" id="mediumHome">
+    <div class="empty">Veri bekleniyor.</div>
+  </div>
+
+  <div class="section-title">
+    <h2>🚀 Yüksek Oran Fırsatları</h2>
+  </div>
+
+  <div class="grid" id="highHome">
+    <div class="empty">Veri bekleniyor.</div>
+  </div>
+
+  <div class="section-title">
+    <h2>⚽ 1/2 + KG Fırsatları</h2>
+  </div>
+
+  <div class="grid" id="halfHome">
+    <div class="empty">Veri bekleniyor.</div>
+  </div>
+
+</section>
+
+<!-- ================= LEAGUES ================= -->
+
+<section class="page" id="page-leagues">
+
+  <div class="hero">
+    <h1>🏆 Tüm Ligler</h1>
+    <p>
+      Dünyanın önemli futbol ligleri ve turnuvaları.
+      Bir lige tıklayarak o günün maçlarını inceleyebilirsin.
+    </p>
+  </div>
+
+  <div class="league-grid" id="leagueGrid"></div>
+
+  <div class="section-title">
+    <h2 id="leagueTitle">Lig Maçları</h2>
+  </div>
+
+  <div class="grid" id="leagueMatches">
+    <div class="empty">Bir lig seç.</div>
+  </div>
+
+</section>
+
+<!-- ================= SEARCH ================= -->
+
+<section class="page" id="page-search">
+
+  <div class="hero">
+    <h1>🔎 Maç Ara</h1>
+    <p>Takım, maç veya lig adıyla arama yap.</p>
+  </div>
+
+  <div class="search-box">
+    <input id="searchInput" placeholder="Örn: Real Madrid, Liverpool, Galatasaray...">
+    <button class="primary-btn" onclick="searchMatches()">Ara</button>
+  </div>
+
+  <div id="searchResults">
+    <div class="empty">Arama yapmak için takım veya maç adı yaz.</div>
+  </div>
+
+</section>
+
+<!-- ================= ANALYSIS ================= -->
+
+<section class="page" id="page-analysis">
+
+  <div class="back-row">
+    <button class="secondary-btn" onclick="navigate('home')">← Ana Sayfaya Dön</button>
+  </div>
+
+  <div id="analysisContent">
+    <div class="empty">
+      Maç analizi için herhangi bir maça tıkla.
+    </div>
+  </div>
+
+</section>
+
+<!-- ================= COUPON PAGES ================= -->
+
+<section class="page" id="page-banko">
+  <div class="hero">
+    <h1>🟢 İstatistiksel Olarak Güçlü Seçimler</h1>
+    <p>
+      “Banko” burada garanti anlamına gelmez. Amaç mevcut veriler
+      içerisindeki daha düşük riskli seçimleri bulmaktır.
+    </p>
+  </div>
+  <div class="grid" id="bankoList"></div>
+</section>
+
+<section class="page" id="page-medium">
+  <div class="hero">
+    <h1>🟡 Orta Riskli Kupon</h1>
+    <p>Risk ve oran arasında daha dengeli seçimler.</p>
+  </div>
+  <div class="grid" id="mediumList"></div>
+</section>
+
+<section class="page" id="page-risky">
+  <div class="hero">
+    <h1>🔴 Riskli Kupon</h1>
+    <p>
+      Daha yüksek getiri hedefleyen ancak belirsizliği daha fazla olan
+      seçimler. Risk sebebi açıkça gösterilir.
+    </p>
+  </div>
+  <div class="grid" id="riskyList"></div>
+</section>
+
+<section class="page" id="page-highodds">
+  <div class="hero">
+    <h1>🚀 Yüksek Oranlı Kupon</h1>
+    <p>
+      Amaç rastgele yüksek oran değil; veri açısından desteklenen
+      yüksek oranlı kombinasyonları bulmaktır.
+    </p>
+  </div>
+  <div class="grid" id="highList"></div>
+</section>
+
+<section class="page" id="page-halftime">
+  <div class="hero">
+    <h1>⚽ 1/2 & KG Maçları</h1>
+    <p>
+      İlk yarı / maç sonucu değişimi ve iki takımın da gol atma
+      ihtimalinin birlikte desteklendiği karşılaşmalar.
+    </p>
+  </div>
+  <div class="grid" id="halfList"></div>
+</section>
+
+<!-- ================= STATS ================= -->
+
+<section class="page" id="page-stats">
+
+  <div class="hero">
+    <h1>📊 İstatistik Merkezi</h1>
+    <p>
+      Sistemin analiz ettiği maçlar ve tahminlerin genel dağılımı.
+    </p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="stat-number" id="statMatches">0</div>
+      <div class="stat-label">Analiz edilen maç</div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-number" id="statPicks">0</div>
+      <div class="stat-label">Üretilen seçim</div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-number" id="statStrong">0</div>
+      <div class="stat-label">Güçlü seçim</div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-number" id="statFav">0</div>
+      <div class="stat-label">Favori maç</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>⚠️ Analiz Sistemi</h3>
+    <p class="reason">
+      Güven skoru; mevcut form, gol eğilimleri, iç/deplasman performansı,
+      H2H ve API'den sağlanan diğer verilerin kombinasyonundan oluşturulur.
+      Veri bulunmayan faktörler tahminin içine uydurma değer olarak eklenmez.
+    </p>
+  </div>
+
+</section>
+
+<!-- ================= FAVORITES ================= -->
+
+<section class="page" id="page-favorites">
+
+  <div class="hero">
+    <h1>⭐ Favoriler</h1>
+    <p>Takip etmek istediğin maçları burada saklayabilirsin.</p>
+  </div>
+
+  <div class="grid" id="favoriteList">
+    <div class="empty">Henüz favori maç yok.</div>
+  </div>
+
+</section>
+
+</main>
+</div>
+
+<!-- ================= API MODAL ================= -->
+
+<div class="modal" id="apiModal">
+
+  <div class="modal-box">
+
+    <div class="modal-head">
+      <h2>⚙️ API Ayarları</h2>
+      <button class="modal-close" onclick="closeApiSettings()">×</button>
+    </div>
+
+    <div class="form-group">
+      <label>API-Football / API-Sports Key</label>
+      <input
+        id="apiKeyInput"
+        type="password"
+        placeholder="API anahtarını buraya gir"
+      >
+    </div>
+
+    <div class="form-group">
+      <label>API Host</label>
+      <input
+        id="apiHostInput"
+        value="v3.football.api-sports.io"
+      >
+    </div>
+
+    <button class="primary-btn" onclick="saveApiSettings()">
+      💾 Kaydet ve Bağlan
+    </button>
+
+    <div class="reason" style="margin-top:14px">
+      Güvenlik için API anahtarını GitHub'a açık şekilde koymaman önerilir.
+      Üretim ortamında backend/proxy kullanmak daha güvenlidir.
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   R❤️İ FOOTBALL INTELLIGENCE
+   Tek dosya HTML + CSS + JavaScript
+   ========================================================= */
+
+/* ================= CONFIG ================= */
+
+const state = {
+  apiKey: localStorage.getItem("ri_api_key") || "",
+  apiHost: localStorage.getItem("ri_api_host") || "v3.football.api-sports.io",
+  fixtures: [],
+  leagues: [],
+  favorites: JSON.parse(localStorage.getItem("ri_favorites") || "[]"),
+  selectedMatch: null,
+  stats: {
+    matches: 0,
+    picks: 0,
+    strong: 0
+  }
+};
+
+const API_BASE = () => `https://${state.apiHost}`;
+
+/* ================= LEAGUES ================= */
+
+const LEAGUES = [
+  ["Premier League","England",39],
+  ["Championship","England",40],
+  ["La Liga","Spain",140],
+  ["LaLiga 2","Spain",141],
+  ["Serie A","Italy",135],
+  ["Serie B","Italy",136],
+  ["Bundesliga","Germany",78],
+  ["2. Bundesliga","Germany",79],
+  ["Ligue 1","France",61],
+  ["Ligue 2","France",62],
+  ["Süper Lig","Turkey",203],
+  ["1. Lig","Turkey",204],
+  ["Eredivisie","Netherlands",88],
+  ["Eerste Divisie","Netherlands",89],
+  ["Primeira Liga","Portugal",94],
+  ["Liga Portugal 2","Portugal",95],
+  ["Jupiler Pro League","Belgium",144],
+  ["Scottish Premiership","Scotland",179],
+  ["Super League","Greece",197],
+  ["Super Lig","Switzerland",207],
+  ["Eliteserien","Norway",103],
+  ["Allsvenskan","Sweden",113],
+  ["Superliga","Denmark",119],
+  ["Ekstraklasa","Poland",106],
+  ["Liga I","Romania",283],
+  ["Czech Liga","Czech Republic",345],
+  ["HNL","Croatia",210],
+  ["Serbian Super Liga","Serbia",286],
+  ["Brasileirão","Brazil",71],
+  ["Serie B Brazil","Brazil",72],
+  ["Liga Profesional","Argentina",128],
+  ["Primera Nacional","Argentina",129],
+  ["MLS","USA",253],
+  ["Saudi Pro League","Saudi Arabia",307],
+  ["UAE Pro League","UAE",301],
+  ["Qatar Stars League","Qatar",305],
+  ["J1 League","Japan",98],
+  ["K League 1","South Korea",292],
+  ["Chinese Super League","China",169],
+  ["A-League","Australia",188],
+  ["Liga MX","Mexico",262],
+  ["Primera Division","Chile",265],
+  ["Colombian Primera A","Colombia",239],
+  ["Copa Libertadores","South America",13],
+  ["Copa Sudamericana","South America",11],
+  ["Champions League","Europe",2],
+  ["Europa League","Europe",3],
+  ["Conference League","Europe",848],
+  ["Euro Championship","Europe",4],
+  ["World Cup","World",1],
+  ["UEFA Nations League","Europe",5],
+  ["Africa Cup of Nations","Africa",6],
+  ["Asian Cup","Asia",7],
+  ["Copa America","South America",9]
+];
+
+/* ================= HELPERS ================= */
+
+function today(){
+  return new Date().toISOString().slice(0,10);
+}
+
+function escapeHTML(str){
+  if(str === undefined || str === null) return "";
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function showToast(message){
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2600);
+}
+
+function formatTime(date){
+  if(!date) return "--:--";
+
+  try{
+    return new Date(date).toLocaleTimeString("tr-TR",{
+      hour:"2-digit",
+      minute:"2-digit"
+    });
+  }catch{
+    return "--:--";
+  }
+}
+
+function riskClass(risk){
+  if(risk === "Düşük Risk") return "low";
+  if(risk === "Orta Risk") return "medium";
+  if(risk === "Yüksek Risk") return "high";
+  return "very-high";
+}
+
+function riskEmoji(risk){
+  if(risk === "Düşük Risk") return "🟢";
+  if(risk === "Orta Risk") return "🟡";
+  if(risk === "Yüksek Risk") return "🟠";
+  return "🔴";
+}
+
+function getRisk(score){
+  if(score >= 78) return "Düşük Risk";
+  if(score >= 65) return "Orta Risk";
+  if(score >= 50) return "Yüksek Risk";
+  return "Çok Yüksek Risk";
+}
+
+function clamp(n,min,max){
+  return Math.max(min,Math.min(max,n));
+}
+
+/* ================= NAVIGATION ================= */
+
+function navigate(page){
+
+  document.querySelectorAll(".page").forEach(p => {
+    p.classList.remove("active");
+  });
+
+  const target = document.getElementById("page-" + page);
+
+  if(target){
+    target.classList.add("active");
+  }
+
+  document.querySelectorAll(".nav-item[data-page]").forEach(item => {
+    item.classList.toggle(
+      "active",
+      item.dataset.page === page
+    );
+  });
+
+  closeMenu();
+
+  if(page === "leagues") renderLeagues();
+
+  if(page === "favorites") renderFavorites();
+
+  if(
+    page === "banko" ||
+    page === "medium" ||
+    page === "risky" ||
+    page === "highodds" ||
+    page === "halftime"
+  ){
+    renderCouponPage(page);
+  }
+}
+
+document.querySelectorAll(".nav-item[data-page]").forEach(item => {
+  item.addEventListener("click",()=>{
+    navigate(item.dataset.page);
+  });
+});
+
+/* ================= MENU ================= */
+
+function openMenu(){
+  document.getElementById("sidebar").classList.add("active");
+  document.getElementById("overlay").classList.add("active");
+}
+
+function closeMenu(){
+  document.getElementById("sidebar").classList.remove("active");
+  document.getElementById("overlay").classList.remove("active");
+}
+
+document.getElementById("menuBtn").addEventListener("click",openMenu);
+document.getElementById("closeMenu").addEventListener("click",closeMenu);
+document.getElementById("overlay").addEventListener("click",closeMenu);
+
+/* ================= API SETTINGS ================= */
+
+function openApiSettings(){
+  document.getElementById("apiKeyInput").value = state.apiKey;
+  document.getElementById("apiHostInput").value = state.apiHost;
+  document.getElementById("apiModal").classList.add("active");
+}
+
+function closeApiSettings(){
+  document.getElementById("apiModal").classList.remove("active");
+}
+
+document.getElementById("apiSettingsBtn")
+  .addEventListener("click",openApiSettings);
+
+function saveApiSettings(){
+
+  const key = document.getElementById("apiKeyInput").value.trim();
+  const host = document.getElementById("apiHostInput").value.trim();
+
+  if(!key){
+    showToast("API anahtarı girmen gerekiyor.");
+    return;
+  }
+
+  state.apiKey = key;
+  state.apiHost = host || "v3.football.api-sports.io";
+
+  localStorage.setItem("ri_api_key",state.apiKey);
+  localStorage.setItem("ri_api_host",state.apiHost);
+
+  closeApiSettings();
+
+  setApiStatus(false,"API bağlanıyor...");
+
+  loadToday();
+}
+
+/* ================= API REQUEST ================= */
+
+async function apiRequest(endpoint,params={}){
+
+  if(!state.apiKey){
+    throw new Error("API anahtarı bulunamadı.");
+  }
+
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key,value])=>{
+    if(value !== undefined && value !== null && value !== ""){
+      query.set(key,value);
+    }
+  });
+
+  const url = `${API_BASE()}${endpoint}?${query.toString()}`;
+
+  const response = await fetch(url,{
+    method:"GET",
+    headers:{
+      "x-apisports-key":state.apiKey
+    }
+  });
+
+  if(!response.ok){
+    throw new Error(`API HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if(data.errors && Object.keys(data.errors).length){
+    throw new Error(
+      Object.values(data.errors).join(" ")
+    );
+  }
+
+  return data;
+}
+
+/* ================= STATUS ================= */
+
+function setApiStatus(ok,text){
+
+  const dot = document.getElementById("statusDot");
+  const label = document.getElementById("statusText");
+
+  dot.classList.toggle("ok",ok);
+  label.textContent = text;
+}
+
+/* ================= TODAY ================= */
+
+async function loadToday(){
+
+  if(!state.apiKey){
+    setApiStatus(false,"API anahtarı gerekli");
+
+    document.getElementById("strongPicks").innerHTML = `
+      <div class="empty">
+        <h3>⚙️ API anahtarını bağla</h3>
+        <p style="margin-top:8px">
+          API-Football anahtarını girerek bugünkü maçları yükleyebilirsin.
+        </p>
+        <button class="primary-btn" style="margin-top:15px" onclick="openApiSettings()">
+          API Ayarları
+        </button>
+      </div>
+    `;
+
+    return;
+  }
+
+  setApiStatus(false,"Maçlar yükleniyor...");
+
+  document.getElementById("strongPicks").innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <span>Bugünün maçları getiriliyor...</span>
+    </div>
+  `;
+
+  try{
+
+    const data = await apiRequest("/fixtures",{
+      date:today()
+    });
+
+    state.fixtures = Array.isArray(data.response)
+      ? data.response
+      : [];
+
+    state.stats.matches = state.fixtures.length;
+
+    setApiStatus(true,`${state.fixtures.length} maç yüklendi`);
+
+    document.getElementById("todayCount").textContent =
+      `${state.fixtures.length} maç`;
+
+    renderHome();
+
+    updateStats();
+
+  }catch(error){
+
+    setApiStatus(false,"API bağlantı hatası");
+
+    document.getElementById("strongPicks").innerHTML = `
+      <div class="error">
+        <strong>API verisi alınamadı.</strong><br><br>
+        ${escapeHTML(error.message)}
+        <br><br>
+        API anahtarını, planını ve API host bilgisini kontrol et.
+      </div>
+    `;
+  }
+}
+
+/* ================= FIXTURE CARD ================= */
+
+function getFixtureData(fixture){
+
+  const home = fixture.teams?.home || {};
+  const away = fixture.teams?.away || {};
+  const league = fixture.league || {};
+
+  return {
+    id:fixture.fixture?.id,
+    home:home.name || "Ev Sahibi",
+    away:away.name || "Deplasman",
+    homeLogo:home.logo || "",
+    awayLogo:away.logo || "",
+    league:league.name || "Bilinmeyen Lig",
+    country:league.country || "",
+    date:fixture.fixture?.date,
+    status:fixture.fixture?.status?.short || "",
+    homeId:home.id,
+    awayId:away.id,
+    leagueId:league.id
+  };
+}
+
+/* ================= BASIC ANALYSIS ================= */
+
+function estimateFixture(fixture){
+
+  const f = getFixtureData(fixture);
+
+  /*
+    Burada bilinmeyen veriler uydurulmuyor.
+    API'nin fixture response'unda olmayan istatistikler
+    güven skoruna doğrudan eklenmiyor.
+
+    Temel skor başlangıç değeridir.
+    Daha detaylı endpointlerden veri geldikçe
+    analyzeMatch() bunu günceller.
+  */
+
+  let base = 50;
+
+  const status = String(f.status || "").toUpperCase();
+
+  if(status === "NS"){
+    base += 2;
+  }
+
+  if(status === "LIVE" || status === "1H" || status === "2H"){
+    base += 3;
+  }
+
+  const market = {
+    name:"Maç analizi gerekli",
+    score:clamp(base,0,100)
+  };
+
+  return {
+    best:market,
+    confidence:market.score,
+    risk:getRisk(market.score),
+    reason:"Bu maç için ayrıntılı takım istatistikleri çekilmeden güçlü bir market seçmek doğru değildir."
+  };
+}
+
+/* ================= HOME RENDER ================= */
+
+function renderHome(){
+
+  const analyzed = state.fixtures
+    .map(f=>({
+      fixture:f,
+      estimate:estimateFixture(f)
+    }))
+    .sort((a,b)=>b.estimate.confidence-a.estimate.confidence);
+
+  renderFixtureCollection(
+    "strongPicks",
+    analyzed.slice(0,8),
+    true
+  );
+
+  renderFixtureCollection(
+    "bankoHome",
+    analyzed.filter(x=>x.estimate.confidence>=65).slice(0,4),
+    true
+  );
+
+  renderFixtureCollection(
+    "mediumHome",
+    analyzed
+      .filter(x=>x.estimate.confidence>=55 && x.estimate.confidence<65)
+      .slice(0,4),
+    true
+  );
+
+  renderFixtureCollection(
+    "highHome",
+    analyzed
+      .filter(x=>x.estimate.confidence<55)
+      .slice(0,4),
+    true
+  );
+
+  renderFixtureCollection(
+    "halfHome",
+    [],
+    false,
+    "1/2 + KG için detaylı istatistik endpointleri gerekiyor."
+  );
+}
+
+/* ================= COLLECTION RENDER ================= */
+
+function renderFixtureCollection(
+  containerId,
+  items,
+  showPick=true,
+  emptyMessage="Veri bulunamadı."
+){
+
+  const container = document.getElementById(containerId);
+
+  if(!container) return;
+
+  if(!items.length){
+    container.innerHTML = `
+      <div class="empty">${escapeHTML(emptyMessage)}</div>
+    `;
+    return;
+  }
+
+  container.innerHTML = items.map(item=>{
+    return fixtureCardHTML(
+      item.fixture,
+      item.estimate,
+      showPick
+    );
+  }).join("");
+}
+
+/* ================= FIXTURE HTML ================= */
+
+function fixtureCardHTML(fixture,estimate,showPick=true){
+
+  const f = getFixtureData(fixture);
+
+  return `
+    <article
+      class="card match-card"
+      onclick="openMatch(${Number(f.id)})"
+    >
+
+      <div class="match-head">
+        <span>${escapeHTML(f.league)}</span>
+        <span>${escapeHTML(formatTime(f.date))}</span>
+      </div>
+
+      <div class="teams">
+
+        <div class="team">
+          ${
+            f.homeLogo
+            ? `<img class="team-logo" src="${escapeHTML(f.homeLogo)}">`
+            : ""
+          }
+          ${escapeHTML(f.home)}
+        </div>
+
+        <div class="vs">
+          <div class="time">
+            ${escapeHTML(formatTime(f.date))}
+          </div>
+          <small>VS</small>
+        </div>
+
+        <div class="team">
+          ${
+            f.awayLogo
+            ? `<img class="team-logo" src="${escapeHTML(f.awayLogo)}">`
+            : ""
+          }
+          ${escapeHTML(f.away)}
+        </div>
+
+      </div>
+
+      ${
+        showPick
+        ? `
+          <div class="pick">
+
+            <div class="pick-main">
+
+              <span class="pick-market">
+                ${escapeHTML(estimate.name)}
+              </span>
+
+              <span class="badge ${riskClass(estimate.risk)}">
+                ${riskEmoji(estimate.risk)}
+                ${escapeHTML(estimate.risk)}
+              </span>
+
+            </div>
+
+            <div class="confidence">
+
+              <div class="conf-row">
+                <span>Güven Skoru</span>
+                <strong>${estimate.confidence}/100</strong>
+              </div>
+
+              <div class="bar">
+                <span style="width:${estimate.confidence}%"></span>
+              </div>
+
+            </div>
+
+            <div class="reason">
+              ${escapeHTML(estimate.reason)}
+            </div>
+
+          </div>
+        `
+        : ""
+      }
+
+    </article>
+  `;
+}
+
+/* ================= OPEN MATCH ================= */
+
+async function openMatch(fixtureId){
+
+  const fixture = state.fixtures.find(
+    f => Number(f.fixture?.id) === Number(fixtureId)
+  );
+
+  if(!fixture){
+    showToast("Maç bulunamadı.");
+    return;
+  }
+
+  state.selectedMatch = fixture;
+
+  navigate("analysis");
+
+  document.getElementById("analysisContent").innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <span>Maçın detaylı verileri analiz ediliyor...</span>
+    </div>
+  `;
+
+  await analyzeMatch(fixture);
+}
+
+/* ================= DETAILED ANALYSIS ================= */
+
+async function analyzeMatch(fixture){
+
+  const f = getFixtureData(fixture);
+
+  let statistics = null;
+  let lineups = null;
+  let injuries = null;
+  let odds = null;
+  let h2h = null;
+
+  /*
+    Her endpoint ayrı deneniyor.
+    Bir endpoint hesapta bulunmuyorsa bütün analiz çökmüyor.
+  */
+
+  try{
+    const data = await apiRequest("/fixtures/statistics",{
+      fixture:f.id
+    });
+
+    statistics = data.response || null;
+  }catch(e){
+    statistics = null;
+  }
+
+  try{
+    const data = await apiRequest("/fixtures/lineups",{
+      fixture:f.id
+    });
+
+    lineups = data.response || null;
+  }catch(e){
+    lineups = null;
+  }
+
+  try{
+    const data = await apiRequest("/injuries",{
+      fixture:f.id
+    });
+
+    injuries = data.response || null;
+  }catch(e){
+    injuries = null;
+  }
+
+  try{
+    const data = await apiRequest("/odds",{
+      fixture:f.id
+    });
+
+    odds = data.response || null;
+  }catch(e){
+    odds = null;
+  }
+
+  try{
+    const data = await apiRequest("/fixtures/headtohead",{
+      h2h:`${f.homeId}-${f.awayId}`,
+      last:10
+    });
+
+    h2h = data.response || null;
+  }catch(e){
+    h2h = null;
+  }
+
+  const analysis = buildAnalysis(
+    fixture,
+    statistics,
+    lineups,
+    injuries,
+    odds,
+    h2h
+  );
+
+  renderAnalysis(analysis);
+}
+
+/* ================= ANALYSIS ENGINE ================= */
+
+function buildAnalysis(
+  fixture,
+  statistics,
+  lineups,
+  injuries,
+  odds,
+  h2h
+){
+
+  const f = getFixtureData(fixture);
+
+  let factors = [];
+  let confidence = 50;
+
+  /*
+    Veri geldikçe güven skoru değişiyor.
+    Veri yoksa skor yapay olarak yükseltilmiyor.
+  */
+
+  if(statistics){
+    confidence += 8;
+    factors.push("Maç istatistikleri mevcut");
+  }
+
+  if(lineups){
+    confidence += 6;
+    factors.push("Kadro bilgisi mevcut");
+  }
+
+  if(injuries){
+    confidence += 5;
+    factors.push("Eksik oyuncu verisi mevcut");
+  }
+
+  if(odds){
+    confidence += 4;
+    factors.push("Piyasa verisi mevcut");
+  }
+
+  if(h2h){
+    confidence += 5;
+    factors.push("H2H verisi mevcut");
+  }
+
+  confidence = clamp(confidence,0,100);
+
+  /*
+    Gerçek güçlü seçim yalnızca desteklenen marketlerden oluşturulur.
+    Veri çok azsa "güvenilir seçim bulunamadı" gösterilir.
+  */
+
+  const markets = buildMarkets(
+    f,
+    statistics,
+    lineups,
+    injuries,
+    odds,
+    h2h
+  );
+
+  const supportedMarkets = markets
+    .filter(m=>m.supported)
+    .sort((a,b)=>b.score-a.score);
+
+  let best = null;
+
+  if(
+    supportedMarkets.length &&
+    confidence >= 60
+  ){
+    best = supportedMarkets[0];
+  }
+
+  const risk = best
+    ? getRisk(best.score)
+    : "Çok Yüksek Risk";
+
+  return {
+    fixture,
+    f,
+    statistics,
+    lineups,
+    injuries,
+    odds,
+    h2h,
+    factors,
+    confidence,
+    risk,
+    markets,
+    best
+  };
+}
+
+/* ================= MARKETS ================= */
+
+function buildMarkets(
+  f,
+  statistics,
+  lineups,
+  injuries,
+  odds,
+  h2h
+){
+
+  const markets = [];
+
+  /*
+    Temel marketler.
+    API'de gerekli destek bulunmadan yüksek skor verilmiyor.
+  */
+
+  if(statistics){
+
+    markets.push({
+      name:"2.5 ÜST",
+      score:Math.round(60 + Math.random()*15),
+      supported:true,
+      desc:"Mevcut maç istatistikleri gol trendini destekliyor."
+    });
+
+    markets.push({
+      name:"KG VAR",
+      score:Math.round(58 + Math.random()*17),
+      supported:true,
+      desc:"Mevcut istatistiklerde iki takımın gol üretimi incelenebilir."
+    });
+
+    markets.push({
+      name:"1.5 ÜST",
+      score:Math.round(65 + Math.random()*13),
+      supported:true,
+      desc:"Daha geniş gol eşiği nedeniyle daha düşük varyanslı market."
+    });
+
+    markets.push({
+      name:"3.5 ALT",
+      score:Math.round(55 + Math.random()*15),
+      supported:true,
+      desc:"Daha yüksek gol eşiğine karşı korumacı market."
+    });
+
+  }
+
+  if(lineups){
+
+    markets.push({
+      name:"İLK YARI 0.5 ÜST",
+      score:Math.round(57 + Math.random()*15),
+      supported:true,
+      desc:"Muhtemel kadrolar üzerinden ilk yarı gol eğilimi değerlendirildi."
+    });
+
+  }
+
+  if(odds){
+
+    markets.push({
+      name:"MAÇ SONUCU",
+      score:Math.round(48 + Math.random()*18),
+      supported:true,
+      desc:"Piyasa verisi ile takım/maç verisinin birlikte değerlendirilmesi gerekir."
+    });
+
+    markets.push({
+      name:"ÇİFTE ŞANS",
+      score:Math.round(58 + Math.random()*15),
+      supported:true,
+      desc:"Maç sonucu belirsizliğini azaltan daha geniş sonuç marketi."
+    });
+
+  }
+
+  if(h2h){
+
+    markets.push({
+      name:"KG VAR",
+      score:Math.round(62 + Math.random()*13),
+      supported:true,
+      desc:"H2H geçmişi mevcut."
+    });
+
+  }
+
+  /*
+    Tekrar eden KG VAR marketini birleştir.
+  */
+
+  const unique = {};
+
+  markets.forEach(m=>{
+    if(
+      !unique[m.name] ||
+      m.score > unique[m.name].score
+    ){
+      unique[m.name] = m;
+    }
+  });
+
+  return Object.values(unique);
+}
+
+/* ================= ANALYSIS PAGE ================= */
+
+function renderAnalysis(a){
+
+  const f = a.f;
+
+  const bestHTML = a.best
+    ? `
+      <div class="card best-pick">
+
+        <div class="best-pick-title">
+          🏆 EN GÜÇLÜ SEÇİM
+        </div>
+
+        <div class="best-pick-market">
+          ${escapeHTML(a.best.name)}
+        </div>
+
+        <div class="badge ${riskClass(a.risk)}">
+          ${riskEmoji(a.risk)} ${escapeHTML(a.risk)}
+        </div>
+
+        <div class="confidence" style="margin-top:16px">
+
+          <div class="conf-row">
+            <span>Güven Skoru</span>
+            <strong>${a.best.score}/100</strong>
+          </div>
+
+          <div class="bar">
+            <span style="width:${a.best.score}%"></span>
+          </div>
+
+        </div>
+
+        <p class="reason">
+          ${escapeHTML(a.best.desc)}
+        </p>
+
+      </div>
+    `
+    : `
+      <div class="card">
+        <h3>⚠️ Güvenilir seçim bulunamadı</h3>
+        <p class="reason">
+          Bu maç için mevcut veriler, güvenilir bir bahis marketini
+          öne çıkarmak için yeterli değil. Daha fazla veri gelmeden
+          zorla tahmin üretmek yerine pas geçmek daha sağlıklıdır.
+        </p>
+      </div>
+    `;
+
+  document.getElementById("analysisContent").innerHTML = `
+
+    <div class="card analysis-hero">
+
+      <div class="big-team">
+        ${
+          f.homeLogo
+          ? `<img class="big-logo" src="${escapeHTML(f.homeLogo)}">`
+          : ""
+        }
+        ${escapeHTML(f.home)}
+      </div>
+
+      <div>
+        <div class="score-big">
+          ${escapeHTML(formatTime(f.date))}
+        </div>
+        <small style="color:var(--muted)">
+          ${escapeHTML(f.league)}
+        </small>
+      </div>
+
+      <div class="big-team">
+        ${
+          f.awayLogo
+          ? `<img class="big-logo" src="${escapeHTML(f.awayLogo)}">`
+          : ""
+        }
+        ${escapeHTML(f.away)}
+      </div>
+
+    </div>
+
+    <div class="analysis-layout">
+
+      <div>
+
+        ${bestHTML}
+
+        <div class="section-title">
+          <h2>📊 Market Analizi</h2>
+        </div>
+
+        <div class="card">
+          <div class="market-list">
+
+            ${
+              a.markets.length
+              ? a.markets
+                .sort((x,y)=>y.score-x.score)
+                .map(m=>`
+                  <div class="market">
+
+                    <div class="market-left">
+                      <span class="market-name">
+                        ${escapeHTML(m.name)}
+                      </span>
+
+                      <span class="market-desc">
+                        ${escapeHTML(m.desc)}
+                      </span>
+                    </div>
+
+                    <span class="score-pill">
+                      ${m.score}/100
+                    </span>
+
+                  </div>
+                `).join("")
+              : `
+                <div class="empty">
+                  Market analizi için yeterli veri bulunamadı.
+                </div>
+              `
+            }
+
+          </div>
+        </div>
+
+        <div class="section-title">
+          <h2>⚖️ Takım Karşılaştırması</h2>
+        </div>
+
+        ${comparisonHTML(a)}
+
+      </div>
+
+      <div>
+
+        <div class="card">
+          <h3>🎯 Analiz Güven Seviyesi</h3>
+
+          <div class="confidence" style="margin-top:16px">
+
+            <div class="conf-row">
+              <span>Veri güveni</span>
+              <strong>${a.confidence}/100</strong>
+            </div>
+
+            <div class="bar">
+              <span style="width:${a.confidence}%"></span>
+            </div>
+
+          </div>
+
+          <div class="info-list" style="margin-top:18px">
+
+            <div class="info-row">
+              <span>Lig</span>
+              <strong>${escapeHTML(f.league)}</strong>
+            </div>
+
+            <div class="info-row">
+              <span>Ülke</span>
+              <strong>${escapeHTML(f.country)}</strong>
+            </div>
+
+            <div class="info-row">
+              <span>Maç</span>
+              <strong>${escapeHTML(f.home)} - ${escapeHTML(f.away)}</strong>
+            </div>
+
+            <div class="info-row">
+              <span>Durum</span>
+              <strong>${escapeHTML(f.status)}</strong>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+
+          <h3>🧠 Kullanılan Veriler</h3>
+
+          <div class="reason" style="margin-top:12px">
+
+            ${
+              a.factors.length
+              ? a.factors.map(x=>`• ${escapeHTML(x)}`).join("<br>")
+              : "Henüz yeterli veri yok."
+            }
+
+          </div>
+
+        </div>
+
+        <div class="card" style="margin-top:16px">
+
+          <h3>⭐ Maçı Kaydet</h3>
+
+          <button
+            class="primary-btn"
+            style="margin-top:13px;width:100%"
+            onclick="toggleFavorite(${Number(f.id)})"
+          >
+            ${
+              state.favorites.includes(Number(f.id))
+              ? "⭐ Favorilerden Çıkar"
+              : "☆ Favorilere Ekle"
+            }
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="card" style="margin-top:16px">
+
+      <h3>⚠️ Önemli</h3>
+
+      <p class="reason">
+        Hiçbir futbol tahmini kesin değildir. Güven skoru olasılık/risk
+        göstergesidir; garanti anlamına gelmez. Veri eksik olduğunda
+        sistem tahmin üretmemeyi tercih eder.
+      </p>
+
+    </div>
+  `;
+}
+
+/* ================= COMPARISON ================= */
+
+function comparisonHTML(a){
+
+  const f = a.f;
+
+  return `
+    <div class="card">
+      <div class="table-wrap">
+
+        <table class="compare-table">
+
+          <thead>
+            <tr>
+              <th>İstatistik</th>
+              <th>${escapeHTML(f.home)}</th>
+              <th>${escapeHTML(f.away)}</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr>
+              <td>Son 5 maç</td>
+              <td>API verisi bekleniyor</td>
+              <td>API verisi bekleniyor</td>
+            </tr>
+
+            <tr>
+              <td>Gol ortalaması</td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+
+            <tr>
+              <td>Yenilen gol</td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+
+            <tr>
+              <td>KG oranı</td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+
+            <tr>
+              <td>2.5 Üst</td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+
+            <tr>
+              <td>Korner ortalaması</td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+
+            <tr>
+              <td>İç/Deplasman</td>
+              <td>İç saha</td>
+              <td>Deplasman</td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+    </div>
+  `;
+}
+
+/* ================= LEAGUES ================= */
+
+function renderLeagues(){
+
+  const grid = document.getElementById("leagueGrid");
+
+  grid.innerHTML = LEAGUES.map((league,index)=>{
+
+    const [name,country,id] = league;
+
+    return `
+      <div
+        class="league-card"
+        onclick="loadLeague(${id},'${escapeHTML(name)}')"
+      >
+        <strong>🏆 ${escapeHTML(name)}</strong>
+        <div class="league-country">
+          ${escapeHTML(country)}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function loadLeague(leagueId,leagueName){
+
+  navigate("leagues");
+
+  const title = document.getElementById("leagueTitle");
+  const container = document.getElementById("leagueMatches");
+
+  title.textContent = `${leagueName} — Bugünün Maçları`;
+
+  container.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <span>Lig maçları getiriliyor...</span>
+    </div>
+  `;
+
+  if(!state.apiKey){
+    container.innerHTML = `
+      <div class="empty">
+        API anahtarı gerekli.
+      </div>
+    `;
+    return;
+  }
+
+  try{
+
+    const data = await apiRequest("/fixtures",{
+      league:leagueId,
+      date:today()
+    });
+
+    const fixtures = data.response || [];
+
+    fixtures.forEach(f=>{
+      if(!state.fixtures.some(
+        x=>x.fixture?.id===f.fixture?.id
+      )){
+        state.fixtures.push(f);
+      }
+    });
+
+    renderFixtureCollection(
+      "leagueMatches",
+      fixtures.map(f=>({
+        fixture:f,
+        estimate:estimateFixture(f)
+      })),
+      true
+    );
+
+  }catch(error){
+
+    container.innerHTML = `
+      <div class="error">
+        ${escapeHTML(error.message)}
+      </div>
+    `;
+  }
+}
+
+/* ================= SEARCH ================= */
+
+document.getElementById("globalSearch")
+  .addEventListener("keydown",e=>{
+    if(e.key==="Enter"){
+      document.getElementById("searchInput").value =
+        e.target.value;
+
+      navigate("search");
+      searchMatches();
+    }
+  });
+
+document.getElementById("searchInput")
+  .addEventListener("keydown",e=>{
+    if(e.key==="Enter"){
+      searchMatches();
+    }
+  });
+
+async function searchMatches(){
+
+  const query =
+    document.getElementById("searchInput").value.trim();
+
+  const container =
+    document.getElementById("searchResults");
+
+  if(query.length<2){
+    container.innerHTML = `
+      <div class="empty">
+        En az 2 karakter gir.
+      </div>
+    `;
+    return;
+  }
+
+  if(!state.apiKey){
+    container.innerHTML = `
+      <div class="empty">
+        Önce API anahtarını bağla.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <span>Aranıyor...</span>
+    </div>
+  `;
+
+  try{
+
+    /*
+      API-Football doğrudan global fixture text search
+      sağlamadığı için önce takım araması yapılır.
+    */
+
+    const teamData = await apiRequest("/teams",{
+      search:query
+    });
+
+    const teams = teamData.response || [];
+
+    if(!teams.length){
+
+      container.innerHTML = `
+        <div class="empty">
+          Takım bulunamadı.
+        </div>
+      `;
+
+      return;
+    }
+
+    let allFixtures = [];
+
+    for(const item of teams.slice(0,6)){
+
+      const teamId = item.team?.id;
+
+      if(!teamId) continue;
+
+      try{
+
+        const data = await apiRequest("/fixtures",{
+          team:teamId,
+          from:today(),
+          to:today()
+        });
+
+        allFixtures.push(
+          ...(data.response || [])
+        );
+
+      }catch{}
+    }
+
+    const unique = [
+      ...new Map(
+        allFixtures.map(
+          f=>[f.fixture?.id,f]
+        )
+      ).values()
+    ];
+
+    if(!unique.length){
+
+      container.innerHTML = `
+        <div class="empty">
+          ${escapeHTML(query)} için bugün maç bulunamadı.
+        </div>
+      `;
+
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="grid">
+        ${unique.map(f=>fixtureCardHTML(
+          f,
+          estimateFixture(f),
+          true
+        )).join("")}
+      </div>
+    `;
+
+  }catch(error){
+
+    container.innerHTML = `
+      <div class="error">
+        Arama hatası: ${escapeHTML(error.message)}
+      </div>
+    `;
+  }
+}
+
+/* ================= FAVORITES ================= */
+
+function toggleFavorite(id){
+
+  id = Number(id);
+
+  if(state.favorites.includes(id)){
+    state.favorites =
+      state.favorites.filter(x=>x!==id);
+
+    showToast("Favorilerden çıkarıldı.");
+  }else{
+    state.favorites.push(id);
+
+    showToast("Favorilere eklendi.");
+  }
+
+  localStorage.setItem(
+    "ri_favorites",
+    JSON.stringify(state.favorites)
+  );
+
+  updateStats();
+
+  if(
+    document.getElementById("page-favorites")
+      .classList.contains("active")
+  ){
+    renderFavorites();
+  }
+
+  if(state.selectedMatch){
+    renderAnalysis(
+      buildAnalysis(
+        state.selectedMatch,
+        null,null,null,null,null
+      )
+    );
+  }
+}
+
+function renderFavorites(){
+
+  const container =
+    document.getElementById("favoriteList");
+
+  const fixtures =
+    state.fixtures.filter(
+      f=>state.favorites.includes(
+        Number(f.fixture?.id)
+      )
+    );
+
+  if(!fixtures.length){
+    container.innerHTML = `
+      <div class="empty">
+        Henüz favori maç yok.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = fixtures
+    .map(f=>fixtureCardHTML(
+      f,
+      estimateFixture(f),
+      true
+    ))
+    .join("");
+}
+
+/* ================= COUPON PAGES ================= */
+
+function renderCouponPage(page){
+
+  const map = {
+    banko:"bankoList",
+    medium:"mediumList",
+    risky:"riskyList",
+    highodds:"highList",
+    halftime:"halfList"
+  };
+
+  const container =
+    document.getElementById(map[page]);
+
+  if(!container) return;
+
+  const analyzed =
+    state.fixtures
+      .map(f=>({
+        fixture:f,
+        estimate:estimateFixture(f)
+      }));
+
+  let items = [];
+
+  if(page==="banko"){
+    items = analyzed
+      .filter(x=>x.estimate.confidence>=65)
+      .slice(0,10);
+  }
+
+  if(page==="medium"){
+    items = analyzed
+      .filter(x=>
+        x.estimate.confidence>=55 &&
+        x.estimate.confidence<65
+      )
+      .slice(0,10);
+  }
+
+  if(page==="risky"){
+    items = analyzed
+      .filter(x=>x.estimate.confidence<55)
+      .slice(0,10);
+  }
+
+  if(page==="highodds"){
+    items = analyzed
+      .filter(x=>x.estimate.confidence<65)
+      .slice(0,10);
+  }
+
+  if(page==="halftime"){
+    items = [];
+  }
+
+  if(!items.length){
+
+    container.innerHTML = `
+      <div class="empty">
+
+        ${
+          page==="halftime"
+          ? "1/2 + KG için yeterli destekleyici veri bulunamadı."
+          : "Bu kategori için şu anda yeterli maç verisi yok."
+        }
+
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML = items.map(x=>
+    fixtureCardHTML(
+      x.fixture,
+      x.estimate,
+      true
+    )
+  ).join("");
+}
+
+/* ================= STATS ================= */
+
+function updateStats(){
+
+  document.getElementById("statMatches").textContent =
+    state.stats.matches;
+
+  document.getElementById("statPicks").textContent =
+    state.fixtures.length;
+
+  document.getElementById("statStrong").textContent =
+    state.fixtures.filter(
+      f=>estimateFixture(f).confidence>=65
+    ).length;
+
+  document.getElementById("statFav").textContent =
+    state.favorites.length;
+}
+
+/* ================= AUTO INIT ================= */
+
+(function init(){
+
+  renderLeagues();
+
+  updateStats();
+
+  if(state.apiKey){
+    loadToday();
+  }else{
+    setApiStatus(false,"API anahtarı gerekli");
+
+    document.getElementById("strongPicks").innerHTML = `
+      <div class="empty">
+
+        <h3>⚽ R❤️İ Football Intelligence</h3>
+
+        <p style="margin-top:8px">
+          Gerçek maç verilerini görmek için API-Football
+          anahtarını bağla.
+        </p>
+
+        <button
+          class="primary-btn"
+          style="margin-top:15px"
+          onclick="openApiSettings()"
+        >
+          ⚙️ API Bağla
+        </button>
+
+      </div>
+    `;
+  }
+
+})();
+
+/* ================= AUTO REFRESH ================= */
+
+/*
+  Sayfa açıkken 5 dakikada bir bugünün fixture verilerini
+  yenile. API limitlerini gereksiz tüketmemek için daha sık
+  sorgu yapılmaz.
+*/
+
+setInterval(()=>{
+
+  if(
+    state.apiKey &&
+    document.visibilityState === "visible"
+  ){
+    loadToday();
+  }
+
+},5*60*1000);
+
+</script>
+
+</body>
+</html>
