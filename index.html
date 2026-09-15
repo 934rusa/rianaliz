@@ -109,15 +109,21 @@ function updateDate() {
    MOBILE SIDEBAR
 ========================================================= */
 
-const sidebar =
-  document.getElementById("sidebar");
+document.addEventListener("DOMContentLoaded", () => {
 
-const mobileMenu =
-  document.getElementById("mobileMenu");
+  const sidebar =
+    document.getElementById("sidebar");
 
-mobileMenu.addEventListener("click", () => {
+  const mobileMenu =
+    document.getElementById("mobileMenu");
 
-  sidebar.classList.toggle("open");
+  if (mobileMenu && sidebar) {
+
+    mobileMenu.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+    });
+
+  }
 
 });
 
