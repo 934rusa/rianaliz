@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#06130f">
+
+  <title>R❤️İ Football — Futbol Analiz Merkezi</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- MOBİL MENÜ OVERLAY -->
+  <div id="mobileOverlay" class="mobile-overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar">
+
+    <div class="brand">
+      <div class="brand-logo">R❤️İ</div>
+
+      <div>
+        <h1>R❤️İ Football</h1>
+        <span>Futbol Analiz Merkezi</span>
+      </div>
+    </div>
+
+    <nav class="menu">
+
+      <button class="menu-item active" data-filter="all">
+        🏠
+        <span>Tüm Maçlar</span>
+      </button>
+
+      <button class="menu-item" data-filter="search">
+        🔎
+        <span>Maç Ara</span>
+      </button>
+
+      <button class="menu-item" data-filter="analysis">
+        📊
+        <span>Maç Analizi</span>
+      </button>
+
+      <div class="menu-title">
+        SEÇİMLER
+      </div>
+
+      <button class="menu-item" data-filter="reliable">
+        🟢
+        <span>Güvenilir Seçimler</span>
+      </button>
+
+      <button class="menu-item" data-filter="medium">
+        🟡
+        <span>Orta Riskli</span>
+      </button>
+
+      <button class="menu-item" data-filter="risky">
+        🟠
+        <span>Riskli Seçimler</span>
+      </button>
+
+      <button class="menu-item" data-filter="high">
+        🔥
+        <span>Yüksek Oran Fırsatları</span>
+      </button>
+
+      <div class="menu-title">
+        GOL ANALİZİ
+      </div>
+
+      <button class="menu-item" data-filter="iy2y">
+        ⚡
+        <span>İY / 2Y KG</span>
+      </button>
+
+      <button class="menu-item" data-filter="first-half">
+        1️⃣
+        <span>1. Yarı Gol Beklenenler</span>
+      </button>
+
+      <button class="menu-item" data-filter="second-half">
+        2️⃣
+        <span>2. Yarı Gol Beklenenler</span>
+      </button>
+
+      <button class="menu-item" data-filter="score">
+        🎯
+        <span>Tahmini Skorlar</span>
+      </button>
+
+      <div class="menu-title">
+        DİĞER
+      </div>
+
+      <button class="menu-item" data-filter="stats">
+        📈
+        <span>İstatistikler</span>
+      </button>
+
+      <button class="menu-item" data-filter="favorites">
+        ❤️
+        <span>Favoriler</span>
+      </button>
+
+      <!-- LİGLER BURAYA OTOMATİK EKLENECEK -->
+      <div class="menu-title league-menu-title">
+        LİGLER & TURNUVALAR
+      </div>
+
+      <div id="leagueMenu" class="league-menu">
+
+        <div class="league-loading">
+          ⚽ Ligler yükleniyor...
+        </div>
+
+      </div>
+
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="api-dot"></div>
+      <span>API-Football bağlı</span>
+    </div>
+
+  </aside>
+
+
+  <!-- ANA ALAN -->
+  <main class="main">
+
+    <header class="topbar">
+
+      <button
+        id="hamburger"
+        class="hamburger-btn"
+        type="button"
+        aria-label="Menüyü aç"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="mobile-brand">
+        R❤️İ Football
+      </div>
+
+      <div
+        id="apiStatus"
+        class="api-status"
+      >
+        ● API BAĞLANIYOR...
+      </div>
+
+      <button
+        class="refresh-btn"
+        id="refreshBtn"
+      >
+        ↻ Yenile
+      </button>
+
+    </header>
+
+
+    <!-- HERO -->
+    <section class="hero">
+
+      <div class="hero-content">
+
+        <div class="hero-badge">
+          ⚽ VERİ ODAKLI FUTBOL ANALİZİ
+        </div>
+
+        <h2>
+          Futbolu sadece tahmin etmiyoruz.
+          <br>
+          <span>Verilerle analiz ediyoruz.</span>
+        </h2>
+
+        <p>
+          Form, goller, H2H, kadro, istatistikler,
+          oranlar ve yarı bazlı veriler birlikte analiz edilir.
+        </p>
+
+        <div class="hero-chips">
+          <span>Son 5</span>
+          <span>Son 10</span>
+          <span>H2H</span>
+          <span>İY KG</span>
+          <span>2Y KG</span>
+          <span>Kadro</span>
+          <span>İstatistik</span>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- TOOLBAR -->
+    <section class="toolbar">
+
+      <div class="search-box">
+
+        <span>🔎</span>
+
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Takım, lig veya ülke ara..."
+          autocomplete="off"
+        >
+
+        <button
+          id="clearSearch"
+          class="clear-search"
+          type="button"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div class="date-box">
+        📅 Bugünün Maçları
+      </div>
+
+    </section>
+
+
+    <!-- QUICK STATS -->
+    <section class="quick-stats">
+
+      <div class="stat-box">
+        <span>Bugünkü Maçlar</span>
+        <strong id="matchCount">—</strong>
+      </div>
+
+      <div class="stat-box">
+        <span>Lig / Turnuva</span>
+        <strong id="leagueCount">—</strong>
+      </div>
+
+      <div class="stat-box">
+        <span>Analiz Motoru</span>
+        <strong>AKTİF</strong>
+      </div>
+
+      <div class="stat-box">
+        <span>Veri Kaynağı</span>
+        <strong>API-Football</strong>
+      </div>
+
+    </section>
+
+
+    <!-- SECTION HEAD -->
+    <section class="section-head">
+
+      <div>
+
+        <span class="section-label">
+          R❤️İ FOOTBALL
+        </span>
+
+        <h2 id="sectionTitle">
+          Bugünün Maçları
+        </h2>
+
+      </div>
+
+      <span id="resultInfo"></span>
+
+    </section>
+
+
+    <!-- MAÇLAR -->
+    <section
+      id="matches"
+      class="matches"
+    >
+
+      <div class="loading">
+
+        <div class="spinner"></div>
+
+        <p>
+          Maçlar yükleniyor...
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ANALİZ DRAWER -->
+  <div
+    id="analysisDrawer"
+    class="analysis-drawer"
+  ></div>
+
+  <div
+    class="drawer-overlay"
+    id="drawerOverlay"
+  ></div>
+
+
+  <script src="app.js"></script>
+
+</body>
+</html>
