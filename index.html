@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#06130f">
+  <title>R❤️İ Football — Futbol Analiz Merkezi</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ================= SIDEBAR ================= -->
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-logo">R❤️İ</div>
+
+      <div>
+        <h1>R❤️İ Football</h1>
+        <span>Futbol Analiz Merkezi</span>
+      </div>
+    </div>
+
+    <nav class="menu">
+
+      <button class="menu-item active" data-filter="all">
+        🏠
+        <span>Tüm Maçlar</span>
+      </button>
+
+      <button class="menu-item" data-filter="search">
+        🔎
+        <span>Maç Ara</span>
+      </button>
+
+      <button class="menu-item" data-filter="analysis">
+        📊
+        <span>Maç Analizi</span>
+      </button>
+
+      <div class="menu-title">SEÇİMLER</div>
+
+      <button class="menu-item" data-filter="reliable">
+        🟢
+        <span>Güvenilir Seçimler</span>
+      </button>
+
+      <button class="menu-item" data-filter="medium">
+        🟡
+        <span>Orta Riskli</span>
+      </button>
+
+      <button class="menu-item" data-filter="risky">
+        🟠
+        <span>Riskli Seçimler</span>
+      </button>
+
+      <button class="menu-item" data-filter="high">
+        🔥
+        <span>Yüksek Oran Fırsatları</span>
+      </button>
+
+      <div class="menu-title">GOL ANALİZİ</div>
+
+      <button class="menu-item" data-filter="iy2y">
+        ⚡
+        <span>İY / 2Y KG</span>
+      </button>
+
+      <button class="menu-item" data-filter="first-half">
+        1️⃣
+        <span>1. Yarı Gol Beklenenler</span>
+      </button>
+
+      <button class="menu-item" data-filter="second-half">
+        2️⃣
+        <span>2. Yarı Gol Beklenenler</span>
+      </button>
+
+      <button class="menu-item" data-filter="score">
+        🎯
+        <span>Tahmini Skorlar</span>
+      </button>
+
+      <div class="menu-title">DİĞER</div>
+
+      <button class="menu-item" data-filter="stats">
+        📈
+        <span>İstatistikler</span>
+      </button>
+
+      <button class="menu-item" data-filter="favorites">
+        ❤️
+        <span>Favoriler</span>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="api-dot"></div>
+      <span>API-Football bağlı</span>
+    </div>
+
+  </aside>
+
+
+  <!-- ================= MAIN ================= -->
+
+  <main class="main">
+
+    <!-- HEADER -->
+
+    <header class="topbar">
+
+      <div class="mobile-brand">
+        R❤️İ Football
+      </div>
+
+      <div class="api-status" id="apiStatus">
+        ● API BAĞLANIYOR...
+      </div>
+
+      <button class="refresh-btn" onclick="loadFixtures()">
+        ↻ Yenile
+      </button>
+
+    </header>
+
+
+    <!-- ================= HERO ================= -->
+
+    <section class="hero">
+
+      <div class="hero-content">
+
+        <div class="hero-badge">
+          ⚽ VERİ ODAKLI FUTBOL ANALİZİ
+        </div>
+
+        <h2>
+          Futbolu sadece tahmin etmiyoruz.<br>
+          <span>Verilerle analiz ediyoruz.</span>
+        </h2>
+
+        <p>
+          Form, goller, H2H, kadro, istatistikler,
+          oranlar ve yarı bazlı veriler birlikte analiz edilir.
+        </p>
+
+        <div class="hero-chips">
+
+          <span>Son 5</span>
+          <span>Son 10</span>
+          <span>H2H</span>
+          <span>İY KG</span>
+          <span>2Y KG</span>
+          <span>Kadro</span>
+          <span>İstatistik</span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= SEARCH ================= -->
+
+    <section class="toolbar">
+
+      <div class="search-box">
+
+        <span>🔎</span>
+
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Takım veya lig ara..."
+          autocomplete="off"
+        >
+
+      </div>
+
+      <div class="date-box">
+        📅 Bugünün Maçları
+      </div>
+
+    </section>
+
+
+    <!-- ================= STATS ================= -->
+
+    <section class="quick-stats">
+
+      <div class="stat-box">
+        <span>Bugünkü Maçlar</span>
+        <strong id="matchCount">—</strong>
+      </div>
+
+      <div class="stat-box">
+        <span>Analiz Motoru</span>
+        <strong>AKTİF</strong>
+      </div>
+
+      <div class="stat-box">
+        <span>Veri Kaynağı</span>
+        <strong>API-Football</strong>
+      </div>
+
+    </section>
+
+
+    <!-- ================= SECTION ================= -->
+
+    <section class="section-head">
+
+      <div>
+        <span class="section-label">R❤️İ FOOTBALL</span>
+
+        <h2 id="sectionTitle">
+          Bugünün Maçları
+        </h2>
+      </div>
+
+      <span id="resultInfo"></span>
+
+    </section>
+
+
+    <!-- ================= MATCHES ================= -->
+
+    <section
+      id="matches"
+      class="matches"
+    >
+
+      <div class="loading">
+
+        <div class="spinner"></div>
+
+        <p>Maçlar yükleniyor...</p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ================= ANALYSIS DRAWER ================= -->
+
+  <div
+    id="analysisDrawer"
+    class="analysis-drawer"
+  ></div>
+
+
+  <!-- ================= OVERLAY ================= -->
+
+  <div
+    class="drawer-overlay"
+    onclick="closeDrawer()"
+  ></div>
+
+
+  <!-- ================= SCRIPT ================= -->
+
+  <script src="app.js"></script>
+
+</body>
+</html>
