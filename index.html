@@ -1943,3 +1943,14 @@ renderLoading();
 
 </script>
 alert("R❤️İ JavaScript başladı");
+window.addEventListener("error", function (e) {
+  document.body.innerHTML =
+    "<pre style='color:red;background:#111;padding:20px;font-size:16px;white-space:pre-wrap'>" +
+    "HATA:\n" +
+    e.message +
+    "\n\nDOSYA: " +
+    e.filename +
+    "\nSATIR: " +
+    e.lineno +
+    "</pre>";
+});
