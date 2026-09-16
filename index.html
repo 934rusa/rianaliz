@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="theme-color"
+    content="#06130f"
+  >
+
+  <meta
+    name="description"
+    content="R❤️İ Football - Futbol Analiz Merkezi"
+  >
+
+  <title>
+    R❤️İ Football — Futbol Analiz Merkezi
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+</head>
+
+
+<body>
+
+  <!-- =====================================================
+       MOBİL MENÜ KARARTMASI
+       ===================================================== -->
+
+  <div
+    id="sidebarOverlay"
+    class="sidebar-overlay"
+  ></div>
+
+
+  <!-- =====================================================
+       SIDEBAR
+       ===================================================== -->
+
+  <aside
+    id="sidebar"
+    class="sidebar"
+  >
+
+    <div class="brand">
+
+      <div class="brand-logo">
+        R❤️İ
+      </div>
+
+      <div class="brand-text">
+
+        <h1>
+          R❤️İ Football
+        </h1>
+
+        <span>
+          Futbol Analiz Merkezi
+        </span>
+
+      </div>
+
+      <button
+        id="closeMenuBtn"
+        class="close-menu-btn"
+        type="button"
+        aria-label="Menüyü kapat"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         ANA MENÜ
+         =================================================== -->
+
+    <nav class="menu">
+
+      <div class="menu-title">
+        ANA MENÜ
+      </div>
+
+
+      <button
+        type="button"
+        class="menu-item active"
+        data-filter="all"
+      >
+
+        <span class="menu-icon">
+          🏠
+        </span>
+
+        <span>
+          Tüm Maçlar
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="search"
+      >
+
+        <span class="menu-icon">
+          🔎
+        </span>
+
+        <span>
+          Maç Ara
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="analysis"
+      >
+
+        <span class="menu-icon">
+          📊
+        </span>
+
+        <span>
+          Maç Analizi
+        </span>
+
+      </button>
+
+
+      <!-- =================================================
+           SEÇİMLER
+           ================================================= -->
+
+      <div class="menu-title">
+        SEÇİMLER
+      </div>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="reliable"
+      >
+
+        <span class="menu-icon">
+          🟢
+        </span>
+
+        <span>
+          Güvenilir Seçimler
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="medium"
+      >
+
+        <span class="menu-icon">
+          🟡
+        </span>
+
+        <span>
+          Orta Riskli
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="high"
+      >
+
+        <span class="menu-icon">
+          🟠
+        </span>
+
+        <span>
+          Riskli / Yüksek Riskli
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="high-odds"
+      >
+
+        <span class="menu-icon">
+          🔥
+        </span>
+
+        <span>
+          Yüksek Oran Fırsatları
+        </span>
+
+      </button>
+
+
+      <!-- =================================================
+           GOL ANALİZİ
+           ================================================= -->
+
+      <div class="menu-title">
+        GOL ANALİZİ
+      </div>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="iy2ykg"
+      >
+
+        <span class="menu-icon">
+          ⚡
+        </span>
+
+        <span>
+          İY / 2Y KG
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="first-half"
+      >
+
+        <span class="menu-icon">
+          1️⃣
+        </span>
+
+        <span>
+          1. Yarı Gol Beklenenler
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="second-half"
+      >
+
+        <span class="menu-icon">
+          2️⃣
+        </span>
+
+        <span>
+          2. Yarı Gol Beklenenler
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="score"
+      >
+
+        <span class="menu-icon">
+          🎯
+        </span>
+
+        <span>
+          Tahmini Skorlar
+        </span>
+
+      </button>
+
+
+      <!-- =================================================
+           DİĞER
+           ================================================= -->
+
+      <div class="menu-title">
+        DİĞER
+      </div>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="stats"
+      >
+
+        <span class="menu-icon">
+          📈
+        </span>
+
+        <span>
+          İstatistikler
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="menu-item"
+        data-filter="favorites"
+      >
+
+        <span class="menu-icon">
+          ❤️
+        </span>
+
+        <span>
+          Favoriler
+        </span>
+
+        <span
+          id="favoriteCount"
+          class="favorite-count"
+        >
+          0
+        </span>
+
+      </button>
+
+
+      <!-- =================================================
+           DİNAMİK LİGLER / TURNUVALAR
+           ================================================= -->
+
+      <div class="league-menu-section">
+
+        <div class="menu-title league-title">
+          LİGLER / TURNUVALAR
+        </div>
+
+
+        <div
+          id="leagueMenu"
+          class="league-menu"
+        >
+
+          <div class="league-loading">
+            Ligler yükleniyor...
+          </div>
+
+        </div>
+
+      </div>
+
+    </nav>
+
+
+    <!-- ===================================================
+         SIDEBAR FOOTER
+         =================================================== -->
+
+    <div class="sidebar-footer">
+
+      <div class="api-dot"></div>
+
+      <span id="sidebarApiStatus">
+        API kontrol ediliyor...
+      </span>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       ANA ALAN
+       ===================================================== -->
+
+  <main class="main">
+
+
+    <!-- ===================================================
+         TOPBAR
+         =================================================== -->
+
+    <header class="topbar">
+
+      <button
+        id="hamburgerBtn"
+        class="hamburger-btn"
+        type="button"
+        aria-label="Menüyü aç"
+        aria-expanded="false"
+      >
+        ☰
+      </button>
+
+
+      <div class="mobile-brand">
+        <strong>
+          R❤️İ
+        </strong>
+
+        Football
+      </div>
+
+
+      <div class="topbar-right">
+
+        <div
+          id="apiStatus"
+          class="api-status"
+        >
+          ● BAĞLANIYOR...
+        </div>
+
+
+        <button
+          id="refreshBtn"
+          class="refresh-btn"
+          type="button"
+        >
+          ↻ Yenile
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- ===================================================
+         HERO
+         =================================================== -->
+
+    <section class="hero">
+
+      <div class="hero-content">
+
+        <div class="hero-badge">
+          ⚽ VERİ ODAKLI FUTBOL ANALİZİ
+        </div>
+
+
+        <h2>
+
+          Futbolu sadece tahmin etmiyoruz.
+
+          <br>
+
+          <span>
+            Verilerle analiz ediyoruz.
+          </span>
+
+        </h2>
+
+
+        <p>
+
+          Form, goller, H2H, kadro,
+          istatistikler, oranlar ve
+          yarı bazlı veriler birlikte
+          değerlendirilir.
+
+        </p>
+
+
+        <div class="hero-chips">
+
+          <span>
+            Son 5
+          </span>
+
+          <span>
+            Son 10
+          </span>
+
+          <span>
+            H2H
+          </span>
+
+          <span>
+            İY KG
+          </span>
+
+          <span>
+            2Y KG
+          </span>
+
+          <span>
+            Kadro
+          </span>
+
+          <span>
+            İstatistik
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         TOOLBAR
+         =================================================== -->
+
+    <section class="toolbar">
+
+      <div class="search-box">
+
+        <span>
+          🔎
+        </span>
+
+
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Takım, lig veya ülke ara..."
+          autocomplete="off"
+        >
+
+
+        <button
+          id="clearSearch"
+          class="clear-search"
+          type="button"
+          aria-label="Aramayı temizle"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div
+        id="dateBox"
+        class="date-box"
+      >
+        📅 Bugünün Maçları
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         HIZLI İSTATİSTİKLER
+         =================================================== -->
+
+    <section class="quick-stats">
+
+      <div class="stat-box">
+
+        <span>
+          Bugünkü Maçlar
+        </span>
+
+        <strong id="matchCount">
+          —
+        </strong>
+
+      </div>
+
+
+      <div class="stat-box">
+
+        <span>
+          Analiz Motoru
+        </span>
+
+        <strong>
+          AKTİF
+        </strong>
+
+      </div>
+
+
+      <div class="stat-box">
+
+        <span>
+          Veri Kaynağı
+        </span>
+
+        <strong>
+          API-FOOTBALL
+        </strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         BAŞLIK
+         =================================================== -->
+
+    <section class="section-head">
+
+      <div>
+
+        <span class="section-label">
+          R❤️İ FOOTBALL
+        </span>
+
+
+        <h2 id="sectionTitle">
+          Bugünün Maçları
+        </h2>
+
+      </div>
+
+
+      <span id="resultInfo"></span>
+
+    </section>
+
+
+    <!-- ===================================================
+         MAÇLAR
+         =================================================== -->
+
+    <section
+      id="matches"
+      class="matches"
+    >
+
+      <div class="loading">
+
+        <div class="spinner"></div>
+
+        <p id="loadingText">
+          Maçlar yükleniyor...
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       ANALİZ DRAWER
+       ===================================================== -->
+
+  <div
+    id="analysisDrawer"
+    class="analysis-drawer"
+    aria-hidden="true"
+  >
+
+    <div class="drawer-inner">
+
+      <button
+        id="drawerClose"
+        class="drawer-close"
+        type="button"
+        aria-label="Analizi kapat"
+      >
+        ×
+      </button>
+
+
+      <div
+        id="analysisContent"
+      ></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       ANALİZ KARARTMASI
+       ===================================================== -->
+
+  <div
+    id="drawerOverlay"
+    class="drawer-overlay"
+  ></div>
+
+
+  <!-- =====================================================
+       APP
+       ===================================================== -->
+
+  <script src="app.js"></script>
+
+
+  <!-- =====================================================
+       UI BRIDGE
+       ===================================================== -->
+
+  <script>
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      function () {
+
+        const sidebar =
+          document.getElementById(
+            "sidebar"
+          );
+
+        const sidebarOverlay =
+          document.getElementById(
+            "sidebarOverlay"
+          );
+
+        const hamburger =
+          document.getElementById(
+            "hamburgerBtn"
+          );
+
+        const closeMenu =
+          document.getElementById(
+            "closeMenuBtn"
+          );
+
+        const drawer =
+          document.getElementById(
+            "analysisDrawer"
+          );
+
+        const drawerOverlay =
+          document.getElementById(
+            "drawerOverlay"
+          );
+
+        const drawerClose =
+          document.getElementById(
+            "drawerClose"
+          );
+
+        const search =
+          document.getElementById(
+            "searchInput"
+          );
+
+        const clearSearch =
+          document.getElementById(
+            "clearSearch"
+          );
+
+        const refresh =
+          document.getElementById(
+            "refreshBtn"
+          );
+
+
+        /* ================================================
+           SIDEBAR AÇ
+           ================================================ */
+
+        function openSidebar() {
+
+          if (!sidebar) {
+            return;
+          }
+
+          sidebar.classList.add(
+            "open"
+          );
+
+          if (sidebarOverlay) {
+
+            sidebarOverlay.classList.add(
+              "open"
+            );
+
+          }
+
+          if (hamburger) {
+
+            hamburger.setAttribute(
+              "aria-expanded",
+              "true"
+            );
+
+          }
+
+          document.body.classList.add(
+            "menu-open"
+          );
+
+        }
+
+
+        /* ================================================
+           SIDEBAR KAPAT
+           ================================================ */
+
+        function closeSidebar() {
+
+          if (sidebar) {
+
+            sidebar.classList.remove(
+              "open"
+            );
+
+          }
+
+          if (sidebarOverlay) {
+
+            sidebarOverlay.classList.remove(
+              "open"
+            );
+
+          }
+
+          if (hamburger) {
+
+            hamburger.setAttribute(
+              "aria-expanded",
+              "false"
+            );
+
+          }
+
+          document.body.classList.remove(
+            "menu-open"
+          );
+
+        }
+
+
+        if (hamburger) {
+
+          hamburger.addEventListener(
+            "click",
+            function (event) {
+
+              event.preventDefault();
+              event.stopPropagation();
+
+              openSidebar();
+
+            }
+          );
+
+        }
+
+
+        if (closeMenu) {
+
+          closeMenu.addEventListener(
+            "click",
+            function (event) {
+
+              event.preventDefault();
+              event.stopPropagation();
+
+              closeSidebar();
+
+            }
+          );
+
+        }
+
+
+        if (sidebarOverlay) {
+
+          sidebarOverlay.addEventListener(
+            "click",
+            closeSidebar
+          );
+
+        }
+
+
+        /* ================================================
+           DRAWER AÇ
+           ================================================ */
+
+        function openDrawer() {
+
+          if (!drawer) {
+            return;
+          }
+
+          drawer.classList.add(
+            "open"
+          );
+
+          drawer.classList.add(
+            "active"
+          );
+
+          drawer.setAttribute(
+            "aria-hidden",
+            "false"
+          );
+
+          if (drawerOverlay) {
+
+            drawerOverlay.classList.add(
+              "open"
+            );
+
+            drawerOverlay.classList.add(
+              "active"
+            );
+
+          }
+
+          document.body.classList.add(
+            "drawer-open"
+          );
+
+        }
+
+
+        /* ================================================
+           DRAWER KAPAT
+           ================================================ */
+
+        function closeDrawer() {
+
+          if (drawer) {
+
+            drawer.classList.remove(
+              "open"
+            );
+
+            drawer.classList.remove(
+              "active"
+            );
+
+            drawer.setAttribute(
+              "aria-hidden",
+              "true"
+            );
+
+          }
+
+          if (drawerOverlay) {
+
+            drawerOverlay.classList.remove(
+              "open"
+            );
+
+            drawerOverlay.classList.remove(
+              "active"
+            );
+
+          }
+
+          document.body.classList.remove(
+            "drawer-open"
+          );
+
+        }
+
+
+        if (drawerClose) {
+
+          drawerClose.addEventListener(
+            "click",
+            function (event) {
+
+              event.preventDefault();
+
+              closeDrawer();
+
+            }
+          );
+
+        }
+
+
+        if (drawerOverlay) {
+
+          drawerOverlay.addEventListener(
+            "click",
+            closeDrawer
+          );
+
+        }
+
+
+        /* ================================================
+           MAÇ KARTINA TIKLAYINCA DRAWER
+           ================================================ */
+
+        document.addEventListener(
+          "click",
+          function (event) {
+
+            const card =
+              event.target.closest(
+                "[data-fixture-id]"
+              );
+
+            if (!card) {
+              return;
+            }
+
+
+            /*
+              Favori butonuna basıldıysa
+              drawer açma.
+            */
+
+            if (
+              event.target.closest(
+                "[data-favorite-id]"
+              )
+            ) {
+
+              return;
+
+            }
+
+
+            /*
+              app.js önce analiz verisini
+              yüklemeye başlar.
+              Drawer'ı hemen açıyoruz.
+            */
+
+            setTimeout(
+              openDrawer,
+              50
+            );
+
+          },
+          true
+        );
+
+
+        /* ================================================
+           ESC
+           ================================================ */
+
+        document.addEventListener(
+          "keydown",
+          function (event) {
+
+            if (
+              event.key ===
+              "Escape"
+            ) {
+
+              closeSidebar();
+              closeDrawer();
+
+            }
+
+          }
+        );
+
+
+        /* ================================================
+           ARAMA TEMİZLE
+           ================================================ */
+
+        if (clearSearch) {
+
+          clearSearch.addEventListener(
+            "click",
+            function () {
+
+              if (!search) {
+                return;
+              }
+
+              search.value = "";
+
+              search.dispatchEvent(
+                new Event(
+                  "input",
+                  {
+                    bubbles: true
+                  }
+                )
+              );
+
+              search.focus();
+
+            }
+          );
+
+        }
+
+
+        /* ================================================
+           YENİLE
+           ================================================ */
+
+        if (refresh) {
+
+          refresh.addEventListener(
+            "click",
+            function () {
+
+              if (
+                typeof window.loadFixtures ===
+                "function"
+              ) {
+
+                window.loadFixtures();
+
+              }
+
+            }
+          );
+
+        }
+
+
+        /* ================================================
+           MENÜ TIKLAMA
+           ================================================ */
+
+        document
+          .querySelectorAll(
+            ".menu-item"
+          )
+          .forEach(
+            function (button) {
+
+              button.addEventListener(
+                "click",
+                function () {
+
+                  document
+                    .querySelectorAll(
+                      ".menu-item"
+                    )
+                    .forEach(
+                      function (item) {
+
+                        item.classList.remove(
+                          "active"
+                        );
+
+                      }
+                    );
+
+
+                  button.classList.add(
+                    "active"
+                  );
+
+
+                  /*
+                    Arama menüsü
+                  */
+
+                  if (
+                    button.dataset.filter ===
+                    "search"
+                  ) {
+
+                    if (search) {
+
+                      search.focus();
+
+                      search.scrollIntoView({
+                        behavior:
+                          "smooth",
+                        block:
+                          "center"
+                      });
+
+                    }
+
+                  }
+
+
+                  /*
+                    Mobilde menü seçildikten
+                    sonra kapanır.
+                  */
+
+                  if (
+                    window.innerWidth <=
+                    900
+                  ) {
+
+                    closeSidebar();
+
+                  }
+
+                }
+              );
+
+            }
+          );
+
+
+        console.log(
+          "[R❤️İ] UI sistemi hazır."
+        );
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
