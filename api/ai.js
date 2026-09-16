@@ -1,189 +1,121 @@
-// ============================================================
-// R❤️İ FOOTBALL — OPENAI AI ANALYSIS ENGINE
-// Vercel Serverless Function
-// ============================================================
-
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      ok: false,
-      error: "Sadece POST isteği kabul edilir."
-    });
-  }
-
-  const API_KEY = process.env.OPENAI_API_KEY;
-
-  if (!API_KEY) {
-    return res.status(500).json({
-      ok: false,
-      error: "OPENAI_API_KEY Vercel Environment Variables içinde bulunamadı."
-    });
-  }
-
   try {
+    if (req.method !== "POST") {
+      return res.status(405).json({
+        success: false,
+        error: "Sadece POST destekleniyor."
+      });
+    }
+
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({
+        success: false,
+        error: "OPENAI_API_KEY bulunamadı."
+      });
+    }
+
     const body = req.body || {};
 
-    const match = body.match || {};
-    const data = body.data || {};
-    const local = body.local || {};
+    const fixture = body.fixture || body.match || body.data || body;
 
-    const home =
-      match?.teams?.home?.name ||
-      match?.home?.name ||
-      "Ev Sahibi";
+    if (!fixture) {
+      return res.status(400).json({
+        success: false,
+        error: "Analiz verisi bulunamadı."
+      });
+    }
 
-    const away =
-      match?.teams?.away?.name ||
-      match?.away?.name ||
-      "Deplasman";
 
-    const league =
-      match?.league?.name ||
-      "Bilinmeyen Lig";
+    /*
+     * API-Football verisini gereksiz şekilde büyütmemek
+     * ve modele daha temiz veri göndermek için özetliyoruz.
+     */
 
-    // --------------------------------------------------------
-    // AI'YA GÖNDERİLECEK VERİYİ KÜÇÜLT
-    // --------------------------------------------------------
+    const compact = {
+      fixture: fixture.fixture || null,
 
-    const analysisData = {
-      form: {
-        home: Array.isArray(data?.form?.home)
-          ? data.form.home.slice(0, 10)
-          : [],
-        away: Array.isArray(data?.form?.away)
-          ? data.form.away.slice(0, 10)
-          : []
-      },
+      league: fixture.league || null,
 
-      h2h: Array.isArray(data?.h2h)
-        ? data.h2h.slice(0, 10)
-        : [],
+      teams: fixture.teams || null,
 
-      standings: Array.isArray(data?.standings)
-        ? data.standings
-        : [],
+      goals: fixture.goals || null,
 
-      team_statistics: {
-        home: Array.isArray(data?.team_statistics?.home)
-          ? data.team_statistics.home
-          : [],
+      score: fixture.score || null,
 
-        away: Array.isArray(data?.team_statistics?.away)
-          ? data.team_statistics.away
-          : []
-      },
+      date: fixture.date || null,
 
-      lineups: Array.isArray(data?.lineups)
-        ? data.lineups.slice(0, 20)
-        : [],
+      statistics: fixture.statistics || null,
 
-      injuries: Array.isArray(data?.injuries)
-        ? data.injuries.slice(0, 30)
-        : [],
+      lineups: fixture.lineups || null,
 
-      statistics: Array.isArray(data?.statistics)
-        ? data.statistics
-        : [],
+      injuries: fixture.injuries || null,
 
-      odds: Array.isArray(data?.odds)
-        ? data.odds
-        : [],
+      odds: fixture.odds || null,
 
-      api_prediction: Array.isArray(data?.api_prediction)
-        ? data.api_prediction
-        : []
+      predictions: fixture.predictions || null,
+
+      h2h: fixture.h2h || fixture.headToHead || null,
+
+      recent: fixture.recent || null,
+
+      standings: fixture.standings || null
     };
 
-    // --------------------------------------------------------
-    // LOCAL MODEL
-    // --------------------------------------------------------
 
-    const localModel = {
-      confidence: local?.confidence ?? null,
-      risk: local?.risk ?? null,
-      predictedScore: local?.predictedScore ?? null,
+    const systemPrompt = `
+Sen R❤️İ Football futbol analiz motorunun yapay zeka analiz katmanısın.
 
-      expectedHome: local?.expectedHome ?? null,
-      expectedAway: local?.expectedAway ?? null,
-      totalExpected: local?.totalExpected ?? null,
+Görevin, sana verilen API-Football verilerini kullanarak
+Türkçe ve veri odaklı futbol maçı analizi üretmektir.
 
-      probabilities: local?.probabilities || {},
-      firstHalfGoalProbability:
-        local?.firstHalfGoalProbability ?? null,
+KESİNLİK İDDİASI YAPMA.
 
-      secondHalfGoalProbability:
-        local?.secondHalfGoalProbability ?? null,
+"Kesin kazanır", "banko", "garanti" gibi ifadeler kullanma.
 
-      firstHalfBTTS:
-        local?.firstHalfBTTS ?? null,
+Veriler yetersizse bunu açıkça belirt.
 
-      secondHalfBTTS:
-        local?.secondHalfBTTS ?? null,
+Analizde mümkün olduğunca şu başlıkları değerlendir:
 
-      bothHalvesBTTS:
-        local?.bothHalvesBTTS ?? null
-    };
+- Takımların güncel formu
+- Son maçlar
+- Ev sahibi / deplasman performansı
+- Gol ortalamaları
+- Karşılıklı gol eğilimi
+- İlk yarı gol eğilimi
+- İkinci yarı gol eğilimi
+- H2H
+- Kadro ve eksikler
+- Maç istatistikleri
+- Oranlar mevcutsa oran hareketleri / piyasa verileri
+- API-Football tahminleri mevcutsa bunlar
+- Muhtemel maç senaryosu
+- Tahmini skor
 
-    // --------------------------------------------------------
-    // OPENAI PROMPT
-    // --------------------------------------------------------
+Sonuçta kullanıcıya kısa ama anlaşılır bir değerlendirme ver.
 
-    const prompt = `
-Sen R❤️İ Football için çalışan profesyonel bir futbol analiz motorusun.
-
-AMAÇ:
-Verilen gerçek futbol verilerini analiz ederek maç için dengeli,
-istatistiksel ve veri odaklı bir değerlendirme üret.
-
-MAÇ:
-${home} vs ${away}
-
-LİG:
-${league}
-
-ÇOK ÖNEMLİ KURALLAR:
-
-1. Kesinlik iddiasında bulunma.
-2. "Kesin tutar", "banko kesin", "%100" gibi ifadeler kullanma.
-3. Sadece verilen verilere dayan.
-4. Veri yetersizse bunu warnings alanında belirt.
-5. Takım isimlerini karıştırma.
-6. Ev sahibi/deplasman ayrımını koru.
-7. Son maç formunu dikkate al.
-8. H2H verisini dikkate al.
-9. Puan durumunu dikkate al.
-10. Takım istatistiklerini dikkate al.
-11. Sakatlıkları ve kadroları dikkate al.
-12. Oranları analiz ederken oranı tek başına gerekçe yapma.
-13. API-Football tahminini bağımsız gerçek kabul etme.
-14. Local model sonucunu kontrol et; gerektiğinde ondan farklı sonuç üret.
-15. Gereksiz bahis üretme.
-16. En mantıklı tek ana seçimi "pick" alanına yaz.
-17. KG, Üst/Alt, maç sonucu ve ilk/ikinci yarı seçeneklerini ayrı değerlendir.
-18. İlk yarı ve ikinci yarı analizini özellikle yap.
-19. Tahmini skor üret.
-20. Risk seviyesini gerçek veri gücüne göre belirle.
-
-RİSK:
-- 75-100: Güvenilir
-- 60-74: Orta Risk
-- 50-59: Riskli
-- 0-49: Yüksek Risk
-
-GÖNDERİLEN VERİLER:
-
-LOCAL MODEL:
-${JSON.stringify(localModel)}
-
-API-FOOTBALL ANALİZ VERİLERİ:
-${JSON.stringify(analysisData)}
-
-Şimdi bütün verileri birlikte değerlendir.
+Yanıt Türkçe olmalı.
 `;
 
-    // --------------------------------------------------------
-    // OPENAI RESPONSES API
-    // --------------------------------------------------------
+
+    const userPrompt = `
+Aşağıdaki API-Football verilerini analiz et.
+
+SADECE VERİLERDEN ÇIKARIM YAP.
+
+Veri:
+
+${JSON.stringify(compact, null, 2)}
+`;
+
+
+    /*
+     * OpenAI Responses API
+     *
+     * ÖNEMLİ:
+     * GPT-5.6 Luna için temperature göndermiyoruz.
+     */
 
     const response = await fetch(
       "https://api.openai.com/v1/responses",
@@ -192,291 +124,145 @@ ${JSON.stringify(analysisData)}
 
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${API_KEY}`
+
+          "Authorization":
+            `Bearer ${apiKey}`
         },
 
         body: JSON.stringify({
+
           model: "gpt-5.6-luna",
 
-          input: prompt,
-
-          temperature: 0.2,
-
-          text: {
-            format: {
-              type: "json_schema",
-
-              name: "ri_football_analysis",
-
-              strict: true,
-
-              schema: {
-                type: "object",
-
-                additionalProperties: false,
-
-                properties: {
-                  pick: {
-                    type: "string"
-                  },
-
-                  confidence: {
-                    type: "number"
-                  },
-
-                  risk: {
-                    type: "string",
-                    enum: [
-                      "Güvenilir",
-                      "Orta Risk",
-                      "Riskli",
-                      "Yüksek Risk"
-                    ]
-                  },
-
-                  predicted_score: {
-                    type: "string"
-                  },
-
-                  summary: {
-                    type: "string"
-                  },
-
-                  markets: {
-                    type: "object",
-                    additionalProperties: false,
-
-                    properties: {
-                      match_result: {
-                        type: "string"
-                      },
-
-                      btts: {
-                        type: "string"
-                      },
-
-                      over_15: {
-                        type: "string"
-                      },
-
-                      over_25: {
-                        type: "string"
-                      },
-
-                      under_35: {
-                        type: "string"
-                      }
-                    },
-
-                    required: [
-                      "match_result",
-                      "btts",
-                      "over_15",
-                      "over_25",
-                      "under_35"
-                    ]
-                  },
-
-                  first_half: {
-                    type: "object",
-                    additionalProperties: false,
-
-                    properties: {
-                      goal_probability: {
-                        type: "number"
-                      },
-
-                      btts: {
-                        type: "string"
-                      },
-
-                      recommendation: {
-                        type: "string"
-                      }
-                    },
-
-                    required: [
-                      "goal_probability",
-                      "btts",
-                      "recommendation"
-                    ]
-                  },
-
-                  second_half: {
-                    type: "object",
-                    additionalProperties: false,
-
-                    properties: {
-                      goal_probability: {
-                        type: "number"
-                      },
-
-                      btts: {
-                        type: "string"
-                      },
-
-                      recommendation: {
-                        type: "string"
-                      }
-                    },
-
-                    required: [
-                      "goal_probability",
-                      "btts",
-                      "recommendation"
-                    ]
-                  },
-
-                  reasons: {
-                    type: "array",
-                    items: {
-                      type: "string"
-                    }
-                  },
-
-                  warnings: {
-                    type: "array",
-                    items: {
-                      type: "string"
-                    }
-                  }
-                },
-
-                required: [
-                  "pick",
-                  "confidence",
-                  "risk",
-                  "predicted_score",
-                  "summary",
-                  "markets",
-                  "first_half",
-                  "second_half",
-                  "reasons",
-                  "warnings"
-                ]
-              }
+          input: [
+            {
+              role: "system",
+              content: systemPrompt
+            },
+            {
+              role: "user",
+              content: userPrompt
             }
-          }
+          ],
+
+          max_output_tokens: 1800
+
         })
       }
     );
 
-    const rawText = await response.text();
 
-    let result;
+    const data = await response.json();
 
-    try {
-      result = JSON.parse(rawText);
-    } catch {
-      return res.status(500).json({
-        ok: false,
-        error: "OpenAI geçersiz JSON cevabı döndürdü.",
-        raw: rawText.slice(0, 1000)
-      });
-    }
 
     if (!response.ok) {
+
       console.error(
-        "R❤️İ OPENAI ERROR:",
-        result
+        "OPENAI ERROR:",
+        JSON.stringify(data)
       );
 
       return res.status(response.status).json({
-        ok: false,
+        success: false,
+
         error:
-          result?.error?.message ||
-          "OpenAI API isteği başarısız oldu."
+          data?.error?.message ||
+          "OpenAI analiz servisi hata verdi.",
+
+        details:
+          data?.error || null
       });
     }
 
-    // --------------------------------------------------------
-    // RESPONSES API ÇIKTISINI AL
-    // --------------------------------------------------------
 
-    let outputText = result?.output_text || "";
+    /*
+     * Responses API çıktısını güvenli şekilde al.
+     */
 
-    if (!outputText && Array.isArray(result?.output)) {
-      for (const item of result.output) {
-        if (!Array.isArray(item?.content)) continue;
+    let text = "";
+
+
+    if (
+      typeof data.output_text ===
+      "string"
+    ) {
+
+      text = data.output_text.trim();
+
+    }
+
+
+    /*
+     * Bazı Responses API cevaplarında
+     * output_text yerine output dizisi bulunabilir.
+     */
+
+    if (!text && Array.isArray(data.output)) {
+
+      for (const item of data.output) {
+
+        if (!Array.isArray(item.content)) {
+          continue;
+        }
 
         for (const content of item.content) {
+
           if (
-            content?.type === "output_text" &&
-            typeof content?.text === "string"
+            content.type === "output_text" &&
+            typeof content.text === "string"
           ) {
-            outputText += content.text;
+
+            text += content.text;
+
           }
+
         }
+
       }
+
+      text = text.trim();
     }
 
-    if (!outputText) {
-      return res.status(500).json({
-        ok: false,
-        error: "OpenAI analiz sonucu boş döndü."
+
+    if (!text) {
+
+      return res.status(502).json({
+        success: false,
+        error: "OpenAI boş analiz döndürdü.",
+        raw: data
       });
+
     }
 
-    let ai;
-
-    try {
-      ai = JSON.parse(outputText);
-    } catch {
-      return res.status(500).json({
-        ok: false,
-        error: "OpenAI analiz JSON'u parse edilemedi.",
-        raw: outputText.slice(0, 1500)
-      });
-    }
-
-    // --------------------------------------------------------
-    // NORMALİZE ET
-    // --------------------------------------------------------
-
-    ai.confidence = Math.max(
-      0,
-      Math.min(
-        100,
-        Number(ai.confidence) || 0
-      )
-    );
-
-    if (
-      !Array.isArray(ai.reasons)
-    ) {
-      ai.reasons = [];
-    }
-
-    if (
-      !Array.isArray(ai.warnings)
-    ) {
-      ai.warnings = [];
-    }
 
     return res.status(200).json({
-      ok: true,
 
-      engine: "R❤️İ OpenAI Football Engine",
+      success: true,
 
-      model: "gpt-5.6-luna",
+      analysis: text,
 
-      generated_at:
-        new Date().toISOString(),
+      model: "gpt-5.6-luna"
 
-      ai
     });
 
+
   } catch (error) {
+
     console.error(
-      "R❤️İ AI ENGINE ERROR:",
+      "AI API ERROR:",
       error
     );
 
     return res.status(500).json({
-      ok: false,
+
+      success: false,
+
       error:
-        error?.message ||
-        "AI analiz motorunda bilinmeyen hata oluştu."
+        "AI analiz servisine bağlanılamadı.",
+
+      message:
+        error.message
+
     });
+
   }
 }
