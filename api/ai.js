@@ -1,11 +1,20 @@
 export default async function handler(req, res) {
   try {
+    /* =====================================================
+       METHOD
+       ===================================================== */
+
     if (req.method !== "POST") {
       return res.status(405).json({
         success: false,
         error: "Sadece POST destekleniyor."
       });
     }
+
+
+    /* =====================================================
+       OPENAI KEY
+       ===================================================== */
 
     const apiKey = process.env.OPENAI_API_KEY;
 
@@ -16,90 +25,277 @@ export default async function handler(req, res) {
       });
     }
 
+
+    /* =====================================================
+       REQUEST BODY
+       ===================================================== */
+
     const body = req.body || {};
 
-    const fixture =
+    let incoming =
       body.fixture ||
       body.match ||
       body.data ||
       body;
 
-    if (!fixture) {
+
+    if (!incoming) {
       return res.status(400).json({
         success: false,
         error: "Analiz verisi bulunamadı."
       });
     }
 
+
     /*
-     * Modele gereksiz veri göndermemek için
-     * API-Football verisini düzenliyoruz.
+     * Yeni app.js yapısında:
+     *
+     * body.fixture = {
+     *   mode,
+     *   fixture,
+     *   details,
+     *   live_state
+     * }
+     *
+     * Eski yapıda ise doğrudan API-Football verisi gelebilir.
+     *
+     * İkisini de destekliyoruz.
      */
 
-    const compact = {
-      fixture: fixture.fixture || null,
+    const isNewPayload =
+      incoming &&
+      typeof incoming === "object" &&
+      (
+        incoming.mode ||
+        incoming.details ||
+        incoming.live_state
+      );
 
-      league: fixture.league || null,
 
-      teams: fixture.teams || null,
+    let mode = "prematch";
 
-      goals: fixture.goals || null,
+    let currentFixture = null;
 
-      score: fixture.score || null,
+    let league = null;
 
-      date: fixture.date || null,
+    let teams = null;
 
-      statistics: fixture.statistics || null,
+    let details = {};
 
-      lineups: fixture.lineups || null,
+    let liveState = null;
 
-      injuries: fixture.injuries || null,
 
-      odds: fixture.odds || null,
+    if (isNewPayload) {
 
-      predictions: fixture.predictions || null,
+      mode =
+        incoming.mode ||
+        "prematch";
 
-      h2h:
-        fixture.h2h ||
-        fixture.headToHead ||
+      currentFixture =
+        incoming.fixture?.fixture ||
+        incoming.fixture ||
+        null;
+
+      league =
+        incoming.fixture?.league ||
+        null;
+
+      teams =
+        incoming.fixture?.teams ||
+        null;
+
+      details =
+        incoming.details ||
+        {};
+
+      liveState =
+        incoming.live_state ||
+        null;
+
+    } else {
+
+      currentFixture =
+        incoming.fixture ||
+        null;
+
+      league =
+        incoming.league ||
+        null;
+
+      teams =
+        incoming.teams ||
+        null;
+
+      details =
+        incoming;
+
+      liveState =
+        null;
+
+    }
+
+
+    /* =====================================================
+       CURRENT MATCH SCORE TEMİZLEME
+       ===================================================== */
+
+    /*
+     * Çok önemli:
+     *
+     * Mevcut maçın skorunu AI'ya pre-match tahmin
+     * verisi olarak göndermiyoruz.
+     *
+     * Ancak historical H2H / son maç verilerindeki
+     * skorlar korunuyor.
+     */
+
+    const cleanDetails =
+      deepClone(details);
+
+
+    delete cleanDetails.goals;
+
+    delete cleanDetails.score;
+
+
+    if (cleanDetails.fixture) {
+
+      delete cleanDetails.fixture.goals;
+
+      delete cleanDetails.fixture.score;
+
+    }
+
+
+    /* =====================================================
+       CURRENT FIXTURE
+       ===================================================== */
+
+    const cleanCurrentFixture = {
+
+      id:
+        currentFixture?.id ||
         null,
 
-      recent: fixture.recent || null,
+      date:
+        currentFixture?.date ||
+        null,
 
-      standings: fixture.standings || null
+      timezone:
+        currentFixture?.timezone ||
+        null,
+
+      referee:
+        currentFixture?.referee ||
+        null,
+
+      venue:
+        currentFixture?.venue ||
+        null,
+
+      status: {
+
+        short:
+          currentFixture?.status?.short ||
+          null,
+
+        long:
+          currentFixture?.status?.long ||
+          null,
+
+        elapsed:
+          currentFixture?.status?.elapsed ??
+          null
+
+      }
+
     };
 
 
-    /*
-     * AI'ya aynı formatı zorunlu tutuyoruz.
-     *
-     * Böylece frontend tahminleri daha kolay
-     * okuyabilir ve analizler daha tutarlı olur.
-     */
+    /* =====================================================
+       AI VERİSİ
+       ===================================================== */
+
+    const analysisData = {
+
+      mode,
+
+      fixture: cleanCurrentFixture,
+
+      league,
+
+      teams,
+
+      data: cleanDetails,
+
+      /*
+       * Sadece canlı maçta mevcut skor burada bulunabilir.
+       *
+       * AI'ya ayrıca bunun "canlı durum" olduğu söylenecek.
+       */
+
+      live_state:
+        mode === "live"
+          ? liveState
+          : null
+
+    };
+
+
+    /* =====================================================
+       SYSTEM PROMPT
+       ===================================================== */
 
     const systemPrompt = `
 Sen R❤️İ Football'un veri tabanlı futbol analiz motorusun.
 
-Görevin:
-Sadece sana verilen API-Football verilerini analiz ederek
-bir futbol maçı için istatistiksel değerlendirme üretmek.
+Görevin, yalnızca sana verilen API-Football verilerini kullanarak
+maç başlamadan önce futbol tahmini üretmektir.
 
-ÇOK ÖNEMLİ KURALLAR:
+TEMEL KURAL:
 
-1. Veride bulunmayan bilgiyi uydurma.
-2. Kesinlik iddiasında bulunma.
+Bu bir PRE-MATCH analiz sistemidir.
+
+Maç başlamamışsa mevcut maç skoru yoktur ve tahminini
+gelecekte oynanacak maç için üretmelisin.
+
+Mevcut maçın final veya canlı skorunu kullanarak
+"bu maç zaten böyle bitti" şeklinde tahmin yapma.
+
+Eğer mode = "prematch" ise:
+
+- mevcut maç skoru bulunmamaktadır
+- mevcut maçın sonucu bilinmiyor
+- geçmiş maç skorları kullanılabilir
+- H2H skorları kullanılabilir
+- API-Football prediction verileri kullanılabilir
+- form verileri kullanılabilir
+- standings kullanılabilir
+- sakatlık/kadro bilgileri kullanılabilir
+- oranlar kullanılabilir
+
+Eğer mode = "live" ise:
+
+- live_state içindeki skorun mevcut canlı skor olduğunu unutma
+- final sonucu tahmin edilmiş gibi davranma
+- yalnızca mevcut durumdan sonrası için değerlendirme yap
+
+ÇOK ÖNEMLİ:
+
+1. Veride olmayan hiçbir bilgiyi uydurma.
+2. Kesinlik veya garanti iddiasında bulunma.
 3. "Kesin", "garanti", "banko" gibi ifadeler kullanma.
-4. Takımların geçmiş performansını, H2H'yi,
-   gol verilerini, kadroyu, sakatlıkları,
-   oranları ve API tahminlerini birlikte değerlendir.
-5. Bir veri yoksa "veri yok" olarak kabul et.
-6. Tahmin üretirken mümkün olduğunca verilen
-   istatistiklerle gerekçelendir.
-7. Aynı veriler verildiğinde aynı sonuca ulaşmaya çalış.
-8. Tahminleri gereksiz şekilde değiştirme.
-9. Türkçe cevap ver.
+4. Aynı veri verildiğinde mümkün olduğunca aynı tahmini üret.
+5. Tahmini yalnızca verilen istatistiklerle gerekçelendir.
+6. Veri yetersizse "Belirsiz" yaz.
+7. Türkçe cevap ver.
+8. Güven değerini gerçekçi tut.
+9. Güven hiçbir zaman 100 olmasın.
+10. Bir tahmin sadece geçmişte gerçekleşti diye o tahmini kesin doğru kabul etme.
+11. API-Football'un kendi tahminini tek başına gerçek kabul etme.
+12. Birden fazla veri kaynağını birlikte değerlendir.
 
-Özellikle şu pazarları değerlendir:
+DEĞERLENDİRİLECEK PAZARLAR:
 
 - Maç Sonucu
 - KG Var / KG Yok
@@ -110,7 +306,9 @@ bir futbol maçı için istatistiksel değerlendirme üretmek.
 - İkinci Yarı Gol
 - Tahmini Skor
 
-ÇIKTIYI SADECE AŞAĞIDAKİ JSON FORMATINDA ÜRET:
+JSON DIŞINDA HİÇBİR ŞEY YAZMA.
+
+SADECE BU FORMATTA JSON ÜRET:
 
 {
   "mac_sonucu": {
@@ -156,124 +354,225 @@ bir futbol maçı için istatistiksel değerlendirme üretmek.
   "risk": "Düşük / Orta / Yüksek"
 }
 
-guven değeri 0 ile 100 arasında sayı olmalı.
+guven:
 
-Tahmin seçenekleri veriyle desteklenmiyorsa
-tahmin alanına "Belirsiz" yaz.
+- 0 ile 95 arasında olmalı
+- 100 kullanma
+- veri yetersizse 0-50 arası kullan
+- güçlü istatistiksel destek varsa daha yüksek değer kullan
 
-JSON dışında hiçbir şey yazma.
+Tahmin alanında kullanılabilecek örnekler:
+
+Maç sonucu:
+"Ev Sahibi Kazanır"
+"Beraberlik"
+"Deplasman Kazanır"
+"Belirsiz"
+
+KG:
+"Var"
+"Yok"
+"Belirsiz"
+
+2.5:
+"Üst 2.5"
+"Alt 2.5"
+"Belirsiz"
+
+İlk/İkinci yarı:
+"Var"
+"Yok"
+"Belirsiz"
+
+Tahmini skor:
+"2-1"
+"1-1"
+"0-1"
+vb.
+
+Fakat veri desteklemiyorsa "Belirsiz" kullan.
 `;
 
 
+    /* =====================================================
+       USER PROMPT
+       ===================================================== */
+
     const userPrompt = `
-Aşağıdaki API-Football verilerini analiz et.
+Aşağıdaki veriler R❤️İ Football analiz sistemine aittir.
 
-SADECE BU VERİLERİ KULLAN.
+ANALİZ MODU:
+${mode}
 
-Veri:
+ÇOK ÖNEMLİ:
+
+Bu verilerde "fixture" bölümü analiz edilen mevcut maçtır.
+
+Eğer mod "prematch" ise bu maç henüz oynanmamıştır.
+Bu nedenle bu maçın gelecekteki sonucunu tahmin et.
+
+"data" bölümü içerisinde geçmiş maçlar,
+H2H, istatistikler, oranlar, sakatlıklar,
+kadrolar ve API-Football tahminleri bulunabilir.
+
+Geçmiş maçların skorlarını mevcut maçın sonucu sanma.
+
+SADECE VERİDEKİ BİLGİLERİ KULLAN.
+
+VERİ:
 
 ${JSON.stringify(
-  compact,
+  analysisData,
   null,
   2
 )}
 `;
 
 
-    /*
-     * OpenAI Responses API
-     *
-     * temperature KULLANILMIYOR.
-     */
+    /* =====================================================
+       OPENAI
+       ===================================================== */
 
-    const response = await fetch(
-      "https://api.openai.com/v1/responses",
-      {
-        method: "POST",
+    const openAIResponse =
+      await fetch(
+        "https://api.openai.com/v1/responses",
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type":
-            "application/json",
+          headers: {
+            "Content-Type":
+              "application/json",
 
-          "Authorization":
-            `Bearer ${apiKey}`
-        },
+            "Authorization":
+              `Bearer ${apiKey}`
+          },
 
-        body: JSON.stringify({
-          model: "gpt-5.6-luna",
+          body: JSON.stringify({
 
-          input: [
-            {
-              role: "system",
-              content: systemPrompt
-            },
-            {
-              role: "user",
-              content: userPrompt
-            }
-          ],
+            model:
+              "gpt-5.6-luna",
 
-          max_output_tokens: 2200
-        })
-      }
-    );
+            /*
+             * Responses API'ye tek bir metin
+             * input gönderiyoruz.
+             *
+             * Böylece input/content formatından
+             * kaynaklanabilecek 400 hatalarını
+             * ortadan kaldırıyoruz.
+             */
 
+            input:
+              systemPrompt +
+              "\n\n" +
+              userPrompt,
 
-    const data =
-      await response.json();
+            max_output_tokens:
+              2200
 
+          })
 
-    if (!response.ok) {
-
-      console.error(
-        "OPENAI ERROR:",
-        JSON.stringify(data)
+        }
       );
 
-      return res.status(
-        response.status
-      ).json({
-        success: false,
 
-        error:
-          data?.error?.message ||
-          "OpenAI analiz servisi hata verdi.",
+    /* =====================================================
+       OPENAI RESPONSE
+       ===================================================== */
 
-        details:
-          data?.error || null
-      });
+    let data = null;
+
+    const rawResponse =
+      await openAIResponse.text();
+
+
+    try {
+
+      data =
+        JSON.parse(
+          rawResponse
+        );
+
+    } catch {
+
+      data = null;
+
     }
 
 
-    /*
-     * Responses API çıktısını al.
-     */
+    /* =====================================================
+       OPENAI ERROR
+       ===================================================== */
+
+    if (!openAIResponse.ok) {
+
+      console.error(
+        "OPENAI HTTP ERROR:",
+        openAIResponse.status,
+        rawResponse
+      );
+
+
+      return res
+        .status(502)
+        .json({
+
+          success: false,
+
+          error:
+            data?.error?.message ||
+            `OpenAI HTTP ${openAIResponse.status}`,
+
+          openai_status:
+            openAIResponse.status,
+
+          details:
+            data?.error ||
+            rawResponse ||
+            null
+
+        });
+
+    }
+
+
+    /* =====================================================
+       OUTPUT TEXT
+       ===================================================== */
 
     let text = "";
 
 
     if (
-      typeof data.output_text ===
+      typeof data?.output_text ===
       "string"
     ) {
 
       text =
         data.output_text.trim();
+
     }
 
 
+    /*
+     * output_text yoksa output içinden
+     * output_text parçalarını bul.
+     */
+
     if (
       !text &&
-      Array.isArray(data.output)
+      Array.isArray(
+        data?.output
+      )
     ) {
 
       for (
-        const item of data.output
+        const item of
+        data.output
       ) {
 
         if (
           !Array.isArray(
-            item.content
+            item?.content
           )
         ) {
           continue;
@@ -286,82 +585,121 @@ ${JSON.stringify(
         ) {
 
           if (
-            content.type ===
+            content?.type ===
               "output_text" &&
-            typeof content.text ===
+            typeof content?.text ===
               "string"
           ) {
 
             text +=
               content.text;
+
           }
+
         }
+
       }
 
 
       text =
         text.trim();
+
     }
 
+
+    /* =====================================================
+       EMPTY RESPONSE
+       ===================================================== */
 
     if (!text) {
 
+      console.error(
+        "OPENAI EMPTY RESPONSE:",
+        JSON.stringify(
+          data
+        )
+      );
+
+
       return res.status(502).json({
+
         success: false,
+
         error:
-          "OpenAI boş analiz döndürdü."
+          "OpenAI boş analiz döndürdü.",
+
+        details:
+          data || null
+
       });
+
     }
 
 
-    /*
-     * Markdown ```json ... ``` gelirse temizle.
-     */
+    /* =====================================================
+       JSON TEMİZLE
+       ===================================================== */
 
     text =
-      text
-        .replace(/^```json\s*/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/\s*```$/i, "")
-        .trim();
+      cleanJSONText(text);
 
 
-    /*
-     * AI JSON döndürdüyse parse ediyoruz.
-     */
+    /* =====================================================
+       PARSE
+       ===================================================== */
 
-    let parsed = null;
-
+    let parsed;
 
     try {
 
       parsed =
         JSON.parse(text);
 
-    } catch {
+    } catch (error) {
 
-      /*
-       * JSON parse edilemezse
-       * yine de ham analizi kaybetme.
-       */
+      console.error(
+        "AI JSON PARSE ERROR:",
+        text
+      );
 
-      parsed = {
-        genellikle:
+
+      return res.status(502).json({
+
+        success: false,
+
+        error:
+          "AI geçerli JSON döndürmedi.",
+
+        raw:
           text
-      };
+
+      });
+
     }
 
+
+    /* =====================================================
+       NORMALIZE
+       ===================================================== */
+
+    parsed =
+      normalizeAnalysis(
+        parsed
+      );
+
+
+    /* =====================================================
+       SUCCESS
+       ===================================================== */
 
     return res.status(200).json({
 
       success: true,
 
       analysis:
-        typeof parsed === "object"
-          ? JSON.stringify(
-              parsed
-            )
-          : String(parsed),
+        JSON.stringify(
+          parsed
+        ),
 
       analysisData:
         parsed,
@@ -371,6 +709,7 @@ ${JSON.stringify(
 
       cached:
         false
+
     });
 
 
@@ -381,6 +720,7 @@ ${JSON.stringify(
       error
     );
 
+
     return res.status(500).json({
 
       success: false,
@@ -389,7 +729,325 @@ ${JSON.stringify(
         "AI analiz servisine bağlanılamadı.",
 
       message:
-        error.message
+        error?.message ||
+        "Bilinmeyen hata"
+
     });
+
   }
+
+}
+
+
+/* =========================================================
+   JSON CLEAN
+   ========================================================= */
+
+function cleanJSONText(text) {
+
+  let value =
+    String(text || "")
+      .trim();
+
+
+  /*
+   * ```json
+   */
+
+  value =
+    value.replace(
+      /^```json\s*/i,
+      ""
+    );
+
+
+  /*
+   * ```
+   */
+
+  value =
+    value.replace(
+      /^```\s*/i,
+      ""
+    );
+
+
+  value =
+    value.replace(
+      /\s*```$/i,
+      ""
+    );
+
+
+  value =
+    value.trim();
+
+
+  /*
+   * AI bazen JSON'dan önce/sonra
+   * kısa açıklama ekleyebilir.
+   *
+   * İlk { ile son } arasını al.
+   */
+
+  const first =
+    value.indexOf("{");
+
+  const last =
+    value.lastIndexOf("}");
+
+
+  if (
+    first >= 0 &&
+    last > first
+  ) {
+
+    value =
+      value.substring(
+        first,
+        last + 1
+      );
+
+  }
+
+
+  return value.trim();
+
+}
+
+
+/* =========================================================
+   ANALYSIS NORMALIZER
+   ========================================================= */
+
+function normalizeAnalysis(data) {
+
+  const result =
+    data &&
+    typeof data === "object"
+      ? data
+      : {};
+
+
+  result.mac_sonucu =
+    normalizeMarket(
+      result.mac_sonucu
+    );
+
+
+  result.kg =
+    normalizeMarket(
+      result.kg
+    );
+
+
+  result.ust_25 =
+    normalizeMarket(
+      result.ust_25
+    );
+
+
+  result.ilk_yari_kg =
+    normalizeMarket(
+      result.ilk_yari_kg
+    );
+
+
+  result.ikinci_yari_kg =
+    normalizeMarket(
+      result.ikinci_yari_kg
+    );
+
+
+  result.ilk_yari_gol =
+    normalizeMarket(
+      result.ilk_yari_gol
+    );
+
+
+  result.ikinci_yari_gol =
+    normalizeMarket(
+      result.ikinci_yari_gol
+    );
+
+
+  if (
+    !result.tahmini_skor ||
+    typeof result.tahmini_skor !==
+      "object"
+  ) {
+
+    result.tahmini_skor = {
+
+      tahmin:
+        "Belirsiz",
+
+      guven:
+        0
+
+    };
+
+  } else {
+
+    result.tahmini_skor.guven =
+      normalizeConfidence(
+        result.tahmini_skor.guven
+      );
+
+    result.tahmini_skor.tahmin =
+      String(
+        result.tahmini_skor.tahmin ||
+        "Belirsiz"
+      );
+
+  }
+
+
+  result.genel_degerlendirme =
+    String(
+      result.genel_degerlendirme ||
+      ""
+    );
+
+
+  result.risk =
+    normalizeRisk(
+      result.risk
+    );
+
+
+  return result;
+
+}
+
+
+/* =========================================================
+   MARKET NORMALIZER
+   ========================================================= */
+
+function normalizeMarket(market) {
+
+  if (
+    !market ||
+    typeof market !== "object"
+  ) {
+
+    return {
+
+      tahmin:
+        "Belirsiz",
+
+      guven:
+        0,
+
+      gerekce:
+        ""
+
+    };
+
+  }
+
+
+  return {
+
+    tahmin:
+      String(
+        market.tahmin ||
+        "Belirsiz"
+      ),
+
+    guven:
+      normalizeConfidence(
+        market.guven
+      ),
+
+    gerekce:
+      String(
+        market.gerekce ||
+        ""
+      )
+
+  };
+
+}
+
+
+/* =========================================================
+   CONFIDENCE
+   ========================================================= */
+
+function normalizeConfidence(value) {
+
+  const number =
+    Number(value);
+
+
+  if (
+    !Number.isFinite(number)
+  ) {
+
+    return 0;
+
+  }
+
+
+  return Math.max(
+    0,
+    Math.min(
+      95,
+      Math.round(number)
+    )
+  );
+
+}
+
+
+/* =========================================================
+   RISK
+   ========================================================= */
+
+function normalizeRisk(value) {
+
+  const risk =
+    String(
+      value || ""
+    ).trim();
+
+
+  if (
+    risk === "Düşük" ||
+    risk === "Orta" ||
+    risk === "Yüksek"
+  ) {
+
+    return risk;
+
+  }
+
+
+  return "Orta";
+
+}
+
+
+/* =========================================================
+   DEEP CLONE
+   ========================================================= */
+
+function deepClone(value) {
+
+  try {
+
+    return JSON.parse(
+      JSON.stringify(
+        value
+      )
+    );
+
+  } catch {
+
+    return {};
+
+  }
+
 }
